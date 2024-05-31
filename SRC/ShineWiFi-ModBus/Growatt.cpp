@@ -510,15 +510,8 @@ void Growatt::CreateUIJson(ShineJsonDocument& doc, String Hostname) {
       JsonArray arr = doc.createNestedArray(_Protocol.InputRegisters[i].name);
 
       // value
-      if (_Protocol.InputRegisters[i].multiplier ==
-          (int)_Protocol.InputRegisters[i].multiplier) {
-        arr.add(_Protocol.InputRegisters[i].value *
-                _Protocol.InputRegisters[i].multiplier);
-      } else {
-        arr.add(roundByResolution(_Protocol.InputRegisters[i].value *
-                                      _Protocol.InputRegisters[i].multiplier,
-                                  _Protocol.InputRegisters[i].resolution));
-      }
+      arr.add(getRegValue(&_Protocol.InputRegisters[i]));
+
       if (String(_Protocol.InputRegisters[i].name) == F("InverterStatus") &&
           _Protocol.InputRegisters[i].value < statusStrLength) {
         arr.add(statusStr[_Protocol.InputRegisters[i].value]);  // use unit for
@@ -535,15 +528,8 @@ void Growatt::CreateUIJson(ShineJsonDocument& doc, String Hostname) {
       JsonArray arr = doc.createNestedArray(_Protocol.HoldingRegisters[i].name);
 
       // value
-      if (_Protocol.HoldingRegisters[i].multiplier ==
-          (int)_Protocol.HoldingRegisters[i].multiplier) {
-        arr.add(_Protocol.HoldingRegisters[i].value *
-                _Protocol.HoldingRegisters[i].multiplier);
-      } else {
-        arr.add(roundByResolution(_Protocol.HoldingRegisters[i].value *
-                                      _Protocol.HoldingRegisters[i].multiplier,
-                                  _Protocol.HoldingRegisters[i].resolution));
-      }
+      arr.add(getRegValue(&_Protocol.HoldingRegisters[i]));
+
       if (String(_Protocol.HoldingRegisters[i].name) == F("InverterStatus") &&
           _Protocol.HoldingRegisters[i].value < statusStrLength) {
         arr.add(statusStr[_Protocol.HoldingRegisters[i].value]);  // use unit
