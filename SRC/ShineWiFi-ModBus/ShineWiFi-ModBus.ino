@@ -114,6 +114,8 @@ struct {
 
 #define CONFIG_PORTAL_MAX_TIME_SECONDS 300
 
+ShineJsonDocument jsonDoc;
+
 // -------------------------------------------------------
 // Check the WiFi status and reconnect if necessary
 // -------------------------------------------------------
@@ -469,18 +471,20 @@ void sendJson(ShineJsonDocument&  doc)
 
 void sendJsonSite(void)
 {
-    StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
-    Inverter.CreateJson(doc, WiFi.macAddress(), Config.hostname);
-
-    sendJson(doc);
+    Inverter.CreateJson(jsonDoc, WiFi.macAddress(), Config.hostname);
+    Log.print(F("jsonDoc memory usage "));
+    Log.print(jsonDoc.memoryUsage());
+    Log.print(F(" of "));
+    Log.print(jsonDoc.capacity());
+    Log.println(F(" bytes"));
+    sendJson(jsonDoc);
 }
 
 void sendUiJsonSite(void)
 {
-    StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
-    Inverter.CreateUIJson(doc, Config.hostname);
+    Inverter.CreateUIJson(jsonDoc, Config.hostname);
 
-    sendJson(doc);
+    sendJson(jsonDoc);
 }
 
 void sendMetrics(void)
@@ -499,9 +503,7 @@ void sendMetrics(void)
 #if MQTT_SUPPORTED == 1
 boolean sendMqttJson(void)
 {
-    StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
-
-    Inverter.CreateJson(doc, WiFi.macAddress(), "");
+    Inverter.CreateJson(jsonDoc, WiFi.macAddress(), "");
     return shineMqtt.mqttPublish(doc);
 }
 #endif

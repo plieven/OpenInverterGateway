@@ -461,6 +461,7 @@ double Growatt::getRegValue(sGrowattModbusReg_t* reg) {
 }
 
 void Growatt::CreateJson(ShineJsonDocument& doc, String MacAddress, String Hostname) {
+    doc.clear();
     if (!Hostname.isEmpty()) {
         doc["Hostname"] = Hostname;
     }
@@ -503,6 +504,7 @@ void Growatt::CreateUIJson(ShineJsonDocument& doc, String Hostname) {
   const char* statusStr[] = {"(Waiting)", "(Normal Operation)", "", "(Error)"};
   const int statusStrLength = sizeof(statusStr) / sizeof(char*);
 
+    doc.clear();
   if (!Hostname.isEmpty()) {
     JsonArray arr = doc.createNestedArray("Hostname");
     arr.add(Hostname);
