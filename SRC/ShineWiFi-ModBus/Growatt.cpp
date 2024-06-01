@@ -489,6 +489,12 @@ void Growatt::CreateJson(ShineJsonDocument& doc, String MacAddress, String Hostn
 #endif  // SIMULATE_INVERTER
   doc["Mac"] = MacAddress;
   doc["Cnt"] = _PacketCnt;
+
+  if (doc.overflowed()) {
+    Log.println(
+        F("WARN CreateJson: ShineJsonDocument overflowed! Output will be "
+          "truncated."));
+  }
 }
 
 void Growatt::CreateUIJson(ShineJsonDocument& doc, String Hostname) {
@@ -591,6 +597,12 @@ void Growatt::CreateUIJson(ShineJsonDocument& doc, String Hostname) {
   arr.add("kWh");
   arr.add(false);
 #endif  // SIMULATE_INVERTER
+
+  if (doc.overflowed()) {
+    Log.println(
+        F("WARN CreateUIJson: ShineJsonDocument overflowed! Output will be "
+          "truncated."));
+  }
 }
 
 void Growatt::camelCaseToSnakeCase(String input, char* output) {
