@@ -46,6 +46,8 @@ typedef enum {
   FREQUENCY,
   TEMPERATURE,
   VA,
+  CURRENT_M,
+  RESISTANCE_K,
 } RegisterUnit_t;
 
 typedef enum {
@@ -79,7 +81,7 @@ typedef struct {
   uint8_t InputFragmentCount;
   uint16_t HoldingRegisterCount;
   uint8_t HoldingFragmentCount;
-  sGrowattModbusReg_t InputRegisters[75];
+  sGrowattModbusReg_t InputRegisters[150];
   sGrowattModbusReg_t HoldingRegisters[75];
   sGrowattReadFragment_t InputReadFragments[10];
   sGrowattReadFragment_t HoldingReadFragments[10];

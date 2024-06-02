@@ -369,7 +369,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     Protocol.InputRegisters[P124_PV1_VOLTAGE] =
     sGrowattModbusReg_t{3003,       0,     SIZE_16BIT, F("PV1Voltage"), 0.1, 0.1,
         VOLTAGE, false, false};
-    Protocol.InputRegisters[P124_PV1_CURRENT] = sGrowattModbusReg_t{
+    Protocol.InputRegisters[P124_PV1_CURRENT] = sGrowattModbusReg_t{ //TODO: real reg names
         3004,       0,     SIZE_16BIT, F("PV1InputCurrent"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_PV1_POWER] = sGrowattModbusReg_t{
@@ -383,6 +383,24 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         CURRENT, false, false};
     Protocol.InputRegisters[P124_PV2_POWER] = sGrowattModbusReg_t{
         3009,       0,     SIZE_32BIT, F("PV2InputPower"), 0.1, 0.1,
+        POWER_W, false, false};
+    Protocol.InputRegisters[P124_PV3_VOLTAGE] =
+    sGrowattModbusReg_t{3011,       0,     SIZE_16BIT, F("PV3Voltage"), 0.1, 0.1,
+        VOLTAGE, false, false};
+    Protocol.InputRegisters[P124_PV3_CURRENT] = sGrowattModbusReg_t{
+        3012,       0,     SIZE_16BIT, F("PV3InputCurrent"), 0.1, 0.1,
+        CURRENT, false, false};
+    Protocol.InputRegisters[P124_PV3_POWER] = sGrowattModbusReg_t{
+        3013,       0,     SIZE_32BIT, F("PV3InputPower"), 0.1, 0.1,
+        POWER_W, false, false};
+    Protocol.InputRegisters[P124_PV4_VOLTAGE] =
+    sGrowattModbusReg_t{3015,       0,     SIZE_16BIT, F("PV4Voltage"), 0.1, 0.1,
+        VOLTAGE, false, false};
+    Protocol.InputRegisters[P124_PV4_CURRENT] = sGrowattModbusReg_t{
+        3016,       0,     SIZE_16BIT, F("PV4InputCurrent"), 0.1, 0.1,
+        CURRENT, false, false};
+    Protocol.InputRegisters[P124_PV4_POWER] = sGrowattModbusReg_t{
+        3017,       0,     SIZE_32BIT, F("PV4InputPower"), 0.1, 0.1,
         POWER_W, false, false};
     Protocol.InputRegisters[P124_PSYS] = sGrowattModbusReg_t{
         3019,      0,    SIZE_32BIT_S, F("SystemOutputPower"), 0.1, 0.1,
@@ -425,13 +443,13 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3036, 0,     SIZE_32BIT, F("L3ThreePhaseGridOutputPower"), 0.1, 0.1,
         VA, false, false};
     Protocol.InputRegisters[P124_VAC_RS] = sGrowattModbusReg_t{
-        3034,      0,     SIZE_16BIT, F("RSThreePhaseGridVoltage"), 0.1, 0.1,
+        3038,      0,     SIZE_16BIT, F("RSThreePhaseGridVoltage"), 0.1, 0.1,
         VOLTAGE, false, false};
     Protocol.InputRegisters[P124_VAC_ST] = sGrowattModbusReg_t{
-        3034,      0,     SIZE_16BIT, F("STThreePhaseGridVoltage"), 0.1, 0.1,
+        3039,      0,     SIZE_16BIT, F("STThreePhaseGridVoltage"), 0.1, 0.1,
         VOLTAGE, false, false};
     Protocol.InputRegisters[P124_VAC_TR] = sGrowattModbusReg_t{
-        3034,      0,     SIZE_16BIT, F("TRThreePhaseGridVoltage"), 0.1, 0.1,
+        3040,      0,     SIZE_16BIT, F("TRThreePhaseGridVoltage"), 0.1, 0.1,
         VOLTAGE, false, false};
     Protocol.InputRegisters[P124_PTOUSER_TOTAL] = sGrowattModbusReg_t{
         3041,      0,    SIZE_32BIT_S, F("TotalForwardPower"), 0.1, 0.1,
@@ -452,32 +470,131 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3051,        0,    SIZE_32BIT, F("TotalGenerateEnergy"), 0.1, 0.1,
         POWER_KWH, true, false};
 
-    //
-    //  Protocol.InputRegisters[P124_EPV1_TODAY] = sGrowattModbusReg_t{
-    //      59,        0,     SIZE_32BIT, F("PV1EnergyToday"), 0.1, 0.1,
-    //      POWER_KWH, false, false};
-    //  Protocol.InputRegisters[P124_EPV1_TOTAL] = sGrowattModbusReg_t{
-    //      61,        0,     SIZE_32BIT, F("PV1EnergyTotal"), 0.1, 0.1,
-    //      POWER_KWH, false, false};
-    //  Protocol.InputRegisters[P124_EPV2_TODAY] = sGrowattModbusReg_t{
-    //      63,        0,     SIZE_32BIT, F("PV2EnergyToday"), 0.1, 0.1,
-    //      POWER_KWH, false, false};
-    //  Protocol.InputRegisters[P124_EPV2_TOTAL] = sGrowattModbusReg_t{
-    //      65,        0,     SIZE_32BIT, F("PV2EnergyTotal"), 0.1, 0.1,
-    //      POWER_KWH, false, false};
-    //  Protocol.InputRegisters[P124_EPV_TOTAL] = sGrowattModbusReg_t{
-    //      91,        0,     SIZE_32BIT, F("PVEnergyTotal"), 0.1, 0.1,
-    //      POWER_KWH, false, false};
-    //
-    //  Protocol.InputRegisters[P124_TEMP1] = sGrowattModbusReg_t{
-    //      93,          0,    SIZE_16BIT, F("InverterTemperature"), 0.1, 0.1,
-    //      TEMPERATURE, true, true};
-    //  Protocol.InputRegisters[P124_TEMP2] = sGrowattModbusReg_t{
-    //      94,          0,     SIZE_16BIT, F("TemperatureInsideIPM"), 0.1, 0.1,
-    //      TEMPERATURE, false, false};
-    //  Protocol.InputRegisters[P124_TEMP3] = sGrowattModbusReg_t{
-    //      95,          0,     SIZE_16BIT, F("BoostTemperature"), 0.1, 0.1,
-    //      TEMPERATURE, false, false};
+      Protocol.InputRegisters[P124_EPV_TOTAL] = sGrowattModbusReg_t{
+          3053,        0,     SIZE_32BIT, F("PVEnergyTotal"), 0.1, 0.1,
+          POWER_KWH, false, false};
+    
+    
+      Protocol.InputRegisters[P124_EPV1_TODAY] = sGrowattModbusReg_t{
+          3055,        0,     SIZE_32BIT, F("PV1EnergyToday"), 0.1, 0.1,
+          POWER_KWH, false, false};
+      Protocol.InputRegisters[P124_EPV1_TOTAL] = sGrowattModbusReg_t{
+          3057,        0,     SIZE_32BIT, F("PV1EnergyTotal"), 0.1, 0.1,
+          POWER_KWH, false, false};
+      Protocol.InputRegisters[P124_EPV2_TODAY] = sGrowattModbusReg_t{
+          3059,        0,     SIZE_32BIT, F("PV2EnergyToday"), 0.1, 0.1,
+          POWER_KWH, false, false};
+      Protocol.InputRegisters[P124_EPV2_TOTAL] = sGrowattModbusReg_t{
+          3061,        0,     SIZE_32BIT, F("PV2EnergyTotal"), 0.1, 0.1,
+          POWER_KWH, false, false};
+
+    Protocol.InputRegisters[P124_EPV3_TODAY] = sGrowattModbusReg_t{
+        3063,        0,     SIZE_32BIT, F("PV3EnergyToday"), 0.1, 0.1,
+        POWER_KWH, false, false};
+    Protocol.InputRegisters[P124_EPV3_TOTAL] = sGrowattModbusReg_t{
+        3065,        0,     SIZE_32BIT, F("PV3EnergyTotal"), 0.1, 0.1,
+        POWER_KWH, false, false};
+    Protocol.InputRegisters[P124_ETOUSER_TODAY] = sGrowattModbusReg_t{
+        3067,      0,    SIZE_32BIT, F("TodayEnergyToUser"), 0.1, 0.1,
+        POWER_KWH, true, false};
+    Protocol.InputRegisters[P124_ETOUSER_TOTAL] = sGrowattModbusReg_t{
+        3069,      0,    SIZE_32BIT, F("TotalEnergyToUser"), 0.1, 0.1,
+        POWER_KWH, true, false};
+    Protocol.InputRegisters[P124_ETOGRID_TODAY] = sGrowattModbusReg_t{
+        3071,      0,    SIZE_32BIT, F("TodayEnergyToGrid"), 0.1, 0.1,
+        POWER_KWH, true, false};
+    Protocol.InputRegisters[P124_ETOGRID_TOTAL] = sGrowattModbusReg_t{
+        3073,      0,    SIZE_32BIT, F("TotalEnergyToGrid"), 0.1, 0.1,
+        POWER_KWH, true, false};
+    Protocol.InputRegisters[P124_ELOAD_TODAY] = sGrowattModbusReg_t{
+        3075,      0,    SIZE_32BIT, F("TodayEnergyOfUserLoad"), 0.1, 0.1,
+        POWER_KWH, true, false};
+    Protocol.InputRegisters[P124_ELOAD_TOTAL] = sGrowattModbusReg_t{
+        3077,      0,    SIZE_32BIT, F("TotalEnergyOfUserLoad"), 0.1, 0.1,
+        POWER_KWH, true, false};
+    Protocol.InputRegisters[P124_EPV4_TODAY] = sGrowattModbusReg_t{
+        3079,        0,     SIZE_32BIT, F("PV4EnergyToday"), 0.1, 0.1,
+        POWER_KWH, false, false};
+    Protocol.InputRegisters[P124_EPV4_TOTAL] = sGrowattModbusReg_t{
+        3081,        0,     SIZE_32BIT, F("PV4EnergyTotal"), 0.1, 0.1,
+        POWER_KWH, false, false};
+    Protocol.InputRegisters[P124_EPV_TODAY] = sGrowattModbusReg_t{
+        3083,        0,     SIZE_32BIT, F("PVEnergyToday"), 0.1, 0.1,
+        POWER_KWH, false, false};
+    Protocol.InputRegisters[P124_DERATING_MODE] = sGrowattModbusReg_t{
+        3086,          0,     SIZE_16BIT, F("DeratingMode"), 1, 1,
+        NONE, true, false};   //TODO: decode
+    Protocol.InputRegisters[P124_ISO] = sGrowattModbusReg_t{
+        3087,          0,     SIZE_16BIT, F("PVISOValue"), 1, 1,
+        RESISTANCE_K, false, false};
+    Protocol.InputRegisters[P124_DCI_R] = sGrowattModbusReg_t{
+        3088,          0,     SIZE_16BIT, F("RDCICurr"), 0.1, 0.1,
+        CURRENT_M, false, false};
+    Protocol.InputRegisters[P124_DCI_S] = sGrowattModbusReg_t{
+        3089,          0,     SIZE_16BIT, F("SDCICurr"), 0.1, 0.1,
+        CURRENT_M, false, false};
+    Protocol.InputRegisters[P124_DCI_T] = sGrowattModbusReg_t{
+        3090,          0,     SIZE_16BIT, F("TDCICurr"), 0.1, 0.1,
+        CURRENT_M, false, false};
+    Protocol.InputRegisters[P124_GFCI] = sGrowattModbusReg_t{
+        3090,          0,     SIZE_16BIT, F("GFCICurr"), 1, 1,
+        CURRENT_M, false, false};
+    Protocol.InputRegisters[P124_BUS_VOLTAGE] = sGrowattModbusReg_t{
+        3092,      0,     SIZE_16BIT, F("TotalBusVoltage"), 0.1, 0.1,
+        VOLTAGE, false, false};
+      Protocol.InputRegisters[P124_TEMP1] = sGrowattModbusReg_t{
+          3093,          0,    SIZE_16BIT, F("InverterTemperature"), 0.1, 0.1,
+          TEMPERATURE, true, true};
+      Protocol.InputRegisters[P124_TEMP2] = sGrowattModbusReg_t{
+          3094,          0,     SIZE_16BIT, F("TemperatureInsideIPM"), 0.1, 0.1,
+          TEMPERATURE, false, false};
+      Protocol.InputRegisters[P124_TEMP3] = sGrowattModbusReg_t{
+          3095,          0,     SIZE_16BIT, F("BoostTemperature"), 0.1, 0.1,
+          TEMPERATURE, false, false};
+    Protocol.InputRegisters[P124_TEMP5] = sGrowattModbusReg_t{
+        3097,          0,     SIZE_16BIT, F("CommunicationBoardTemperature"), 0.1, 0.1,
+        TEMPERATURE, false, false};
+
+    Protocol.InputRegisters[P124_P_BUS_VOLTAGE] = sGrowattModbusReg_t{
+        3098,      0,     SIZE_16BIT, F("PBusInsideVoltage"), 0.1, 0.1,
+        VOLTAGE, false, false};
+    Protocol.InputRegisters[P124_N_BUS_VOLTAGE] = sGrowattModbusReg_t{
+        3099,      0,     SIZE_16BIT, F("NBusInsideVoltage"), 0.1, 0.1,
+        VOLTAGE, false, false};
+    Protocol.InputRegisters[P124_IPF] = sGrowattModbusReg_t{
+        3100,      0,     SIZE_16BIT, F("InverterOutputPFNow"), 1, 1,
+        NONE, true, false};
+    Protocol.InputRegisters[P124_REALOPPERCENT] = sGrowattModbusReg_t{
+        3101, 0, SIZE_16BIT, F("RealOutputPercent"), 1, 1, PERCENTAGE, true, true};
+    Protocol.InputRegisters[P124_OPFULLWATT] = sGrowattModbusReg_t{
+        3102, 0, SIZE_32BIT, F("OutputMaxpowerLimited"), 0.1, 0.1, POWER_W, true, true};
+
+      Protocol.InputRegisters[P124_FAULT_MAINCODE] = sGrowattModbusReg_t{
+          3105, 0, SIZE_16BIT, F("InverterFaultMaincode"), 1, 1, NONE, true, false};
+      Protocol.InputRegisters[P124_WARN_MAINCODE] = sGrowattModbusReg_t{
+          3106, 0, SIZE_16BIT, F("InverterWarnMaincode"), 1, 1, NONE, true, false};
+    
+    Protocol.InputRegisters[P124_AFCI_STATUS] = sGrowattModbusReg_t{
+        3112, 0, SIZE_16BIT, F("AFCIStatus"), 1, 1, NONE, true, false};
+
+    Protocol.InputRegisters[P124_INV_START_DELAY] = sGrowattModbusReg_t{
+        3115, 0, SIZE_16BIT, F("InvStartDelayTime"), 1, 1, SECONDS, true, false};
+
+    Protocol.InputRegisters[P124_BDC_ONOFFSTATE] = sGrowattModbusReg_t{
+        3118, 0, SIZE_16BIT, F("BDCConnectState"), 1, 1, NONE, true, false};
+
+    Protocol.InputRegisters[P124_DRYCONTACTSTATE] = sGrowattModbusReg_t{
+        3119, 0, SIZE_16BIT, F("DryContactState"), 1, 1, NONE, true, false};
+
+    Protocol.InputRegisters[P124_PSELF] = sGrowattModbusReg_t{
+        3121, 0, SIZE_32BIT, F("SelfUsePower"), 0.1, 0.1, POWER_W, true, true};
+
+    Protocol.InputRegisters[P124_ESYS_TODAY] = sGrowattModbusReg_t{
+        3123, 0, SIZE_32BIT, F("SystemEnergyToday"), 0.1, 0.1, POWER_KWH, true, true};
+    
+
+    //BMS and Battery stuff
+
     //  Protocol.InputRegisters[P124_FAULT_MAINCODE] = sGrowattModbusReg_t{
     //      104, 0, SIZE_16BIT, F("InverterFaultMaincode"), 1, 1, NONE, true, false};
     //  Protocol.InputRegisters[P124_FAULT_SUBCODE] = sGrowattModbusReg_t{
@@ -531,18 +648,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     //  Protocol.InputRegisters[P124_BATTERY_STATE] = sGrowattModbusReg_t{
     //      1041, 0, SIZE_16BIT, F("BatteryState"), 1, 1, NONE, true, false};
     //
-    //  Protocol.InputRegisters[P124_ETOUSER_TODAY] = sGrowattModbusReg_t{
-    //      1044,      0,    SIZE_32BIT, F("EnergyToUserToday"), 0.1, 0.1,
-    //      POWER_KWH, true, false};
-    //  Protocol.InputRegisters[P124_ETOUSER_TOTAL] = sGrowattModbusReg_t{
-    //      1046,      0,    SIZE_32BIT, F("EnergyToUserTotal"), 0.1, 0.1,
-    //      POWER_KWH, true, false};
-    //  Protocol.InputRegisters[P124_ETOGRID_TODAY] = sGrowattModbusReg_t{
-    //      1048,      0,    SIZE_32BIT, F("EnergyToGridToday"), 0.1, 0.1,
-    //      POWER_KWH, true, false};
-    //  Protocol.InputRegisters[P124_ETOGRID_TOTAL] = sGrowattModbusReg_t{
-    //      1050,      0,    SIZE_32BIT, F("EnergyToGridTotal"), 0.1, 0.1,
-    //      POWER_KWH, true, false};
+
     //  Protocol.InputRegisters[P124_EDISCHARGE_TODAY] = sGrowattModbusReg_t{
     //      1052,      0,    SIZE_32BIT, F("DischargeEnergyToday"), 0.1, 0.1,
     //      POWER_KWH, true, false};
@@ -572,7 +678,8 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     //      POWER_KWH, true, false};
     //  // FRAGMENT 4: END
     
-    Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3000, 64};
+    Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3000, 63};
+    Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3063, 62};
     //  Protocol.InputReadFragments[1] = sGrowattReadFragment_t{53, 59};
     //  Protocol.InputReadFragments[2] = sGrowattReadFragment_t{1009, 55};
     //  Protocol.InputReadFragments[3] = sGrowattReadFragment_t{1124, 4};
