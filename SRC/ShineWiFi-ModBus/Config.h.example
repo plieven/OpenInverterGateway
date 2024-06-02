@@ -28,6 +28,11 @@
 // Enable direct modbus read/write support via the WebGUI. Enabling this is a potential security issue.
 #define ENABLE_MODBUS_COMMUNICATION 1
 
+// Enable http interface to inverter commands. Enabling this is a potential security issue.
+// Invoke /command/list for a list of commands. Commands that require parameters must
+// be executed as HTTP POST with JSON encoded parameters in the body.
+#define ENABLE_HTTP_COMMAND_ENDPOINT 0
+
 // Enable the addition of a name label (set to the hostname) to the metrics export.
 // Be careful, changing this setting will create a new series in Prometheus.
 #define ENABLE_METRICS_NAME_LABEL 0
