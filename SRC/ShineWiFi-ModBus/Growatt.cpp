@@ -460,7 +460,7 @@ double Growatt::getRegValue(sGrowattModbusReg_t* reg) {
   return result;
 }
 
-void Growatt::CreateJson(ShineJsonDocument& doc, String MacAddress, String Hostname) {
+void Growatt::CreateJson(ShineJsonDocument& doc, const String& MacAddress, const String& Hostname) {
     doc.clear();
     if (!Hostname.isEmpty()) {
         doc["Hostname"] = Hostname;
@@ -498,7 +498,7 @@ void Growatt::CreateJson(ShineJsonDocument& doc, String MacAddress, String Hostn
   }
 }
 
-void Growatt::CreateUIJson(ShineJsonDocument& doc, String Hostname) {
+void Growatt::CreateUIJson(ShineJsonDocument& doc, const String& Hostname) {
 #if SIMULATE_INVERTER != 1
   const char* unitStr[] = {"", "W", "kWh", "V", "A", "s", "%", "Hz", "°C", "VA", "mA", "kOhm"};
   const char* statusStr[] = {"(Waiting)", "(Normal Operation)", "", "(Error)"};
@@ -607,7 +607,7 @@ void Growatt::CreateUIJson(ShineJsonDocument& doc, String Hostname) {
   }
 }
 
-void Growatt::camelCaseToSnakeCase(String input, char* output) {
+void Growatt::camelCaseToSnakeCase(const String& input, char* output) {
   int outputIndex = 0;
   for (int i = 0; input[i] != '\0'; i++) {
     if (i > 0 && i < input.length() - 1 && isUpperCase(input[i]) &&
@@ -619,8 +619,8 @@ void Growatt::camelCaseToSnakeCase(String input, char* output) {
   output[outputIndex] = '\0';
 }
 
-void Growatt::metricsAddValue(String name, double value, StringStream& metrics,
-                              String MacAddress, String Hostname) {
+void Growatt::metricsAddValue(const String& name, double value, StringStream& metrics,
+                              const String& MacAddress, const String& Hostname) {
   char nameSnakeCase[name.length() + 10];
   camelCaseToSnakeCase(name, nameSnakeCase);
 
@@ -635,7 +635,7 @@ void Growatt::metricsAddValue(String name, double value, StringStream& metrics,
   metrics.printf("\"} %g\n", value);
 }
 
-void Growatt::CreateMetrics(StringStream& metrics, String MacAddress, String Hostname) {
+void Growatt::CreateMetrics(StringStream& metrics, const String& MacAddress, const String& Hostname) {
 #if SIMULATE_INVERTER != 1
   for (int i = 0; i < _Protocol.InputRegisterCount; i++)
     metricsAddValue(_Protocol.InputRegisters[i].name,
