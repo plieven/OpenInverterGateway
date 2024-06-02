@@ -11,6 +11,10 @@
 #include <WiFiManager.h>
 #include <StreamUtils.h>
 #include <ArduinoOTA.h>
+#include <time.h>
+
+const char* NTP_SERVER = "de.pool.ntp.org";
+const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 
 #ifdef ESP32
     #include <esp_task_wdt.h>
@@ -409,6 +413,8 @@ void setup()
     ArduinoOTA.setPassword(OTA_PASSWORD);
     ArduinoOTA.begin();
     #endif
+
+    configTime(TZ_INFO, NTP_SERVER);
 }
 
 
@@ -677,6 +683,9 @@ long ButtonTimer = 0;
 long LEDTimer = 0;
 long RefreshTimer = 0;
 long WifiRetryTimer = 0;
+long nextNTPSync = 15000;
+
+extern "C" uint8_t sntp_getreachability(uint8_t);
 
 void loop()
 {
@@ -688,6 +697,28 @@ void loop()
     long now = millis();
     char readoutSucceeded;
 
+    if (now > nextNTPSync) {
+        Log.print(F("NTP server: "));
+        Log.print(NTP_SERVER);
+        Log.print(F(" reachability "));
+        int reachable = sntp_getreachability(0);
+        Log.println(reachable);
+        if (reachable) {
+            char buff[32];
+            struct tm tm;
+            time_t now = time(&now);
+            localtime_r(&now, &tm);
+            strftime (buff, sizeof(buff), "{\"value\":\"%Y-%m-%d %T\"}", &tm);
+            StaticJsonDocument<128> req, res;
+            Log.println(F("Trying to set inverter datetime..."));
+            Log.println(buff);
+            Inverter.HandleCommand("datetime/set", (byte*) &buff, strlen(buff), req, res);
+            Log.println(String(res["message"]));
+            nextNTPSync = now + 3600000;
+        } else {
+            nextNTPSync = now + 5000;
+        }
+    }
 #ifdef AP_BUTTON_PRESSED
     if ((now - ButtonTimer) > BUTTON_TIMER)
     {
