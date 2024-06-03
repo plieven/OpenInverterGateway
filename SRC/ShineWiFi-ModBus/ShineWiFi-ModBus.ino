@@ -118,7 +118,7 @@ struct {
 
 #define CONFIG_PORTAL_MAX_TIME_SECONDS 300
 
-ShineJsonDocument jsonDoc;
+DynamicJsonDocument *jsonOutputDoc;
 
 // -------------------------------------------------------
 // Check the WiFi status and reconnect if necessary
@@ -202,7 +202,7 @@ void saveConfig()
     prefs.putString(ConfigFiles.mqtt_port, Config.mqtt.port);
     prefs.putString(ConfigFiles.mqtt_topic, Config.mqtt.topic);
     prefs.putString(ConfigFiles.mqtt_user, Config.mqtt.user);
-    prefs.putString(ConfigFiles.mqtt_pwdx, Config.mqtt.pwd);
+    prefs.putString(ConfigFiles.mqtt_pwd, Config.mqtt.pwd);
 #endif
 }
 
@@ -381,6 +381,18 @@ void setup()
         WiFi_Reconnect();
     }
 
+    Log.print("Free Heap: ");
+    Log.println(ESP.getFreeHeap());
+    Log.print("Max Heap: ");
+    Log.println(ESP.getMaxFreeBlockSize());
+
+    jsonOutputDoc = new DynamicJsonDocument(JSON_DOCUMENT_SIZE);
+
+    Log.print("Free Heap: ");
+    Log.println(ESP.getFreeHeap());
+    Log.print("Max Heap: ");
+    Log.println(ESP.getMaxFreeBlockSize());
+
     #if MQTT_SUPPORTED == 1
         #ifdef MQTTS_ENABLED
             espClient.setCACert(MQTTS_BROKER_CA_CERT);
@@ -469,31 +481,31 @@ void setupMenu(bool enableCustomParams){
     wm.setMenu(menu); // custom menu, pass vector
 }
 
-void sendJson(ShineJsonDocument&  doc)
+void sendJson(DynamicJsonDocument *doc)
 {
-    httpServer.setContentLength(measureJson(doc));
+    httpServer.setContentLength(measureJson(*doc));
     httpServer.send(200, "application/json", "");
     WiFiClient client = httpServer.client();
     WriteBufferingStream bufferedWifiClient{client, BUFFER_SIZE};
-    serializeJson(doc, bufferedWifiClient);
+    serializeJson(*doc, bufferedWifiClient);
 }
 
 void sendJsonSite(void)
 {
-    Inverter.CreateJson(jsonDoc, WiFi.macAddress(), Config.hostname);
-    Log.print(F("jsonDoc memory usage "));
-    Log.print(jsonDoc.memoryUsage());
+    Inverter.CreateJson(*jsonOutputDoc, WiFi.macAddress(), Config.hostname);
+    Log.print(F("jsonOutputDoc memory usage "));
+    Log.print(jsonOutputDoc->memoryUsage());
     Log.print(F(" of "));
-    Log.print(jsonDoc.capacity());
+    Log.print(jsonOutputDoc->capacity());
     Log.println(F(" bytes"));
-    sendJson(jsonDoc);
+    sendJson(jsonOutputDoc);
 }
 
 void sendUiJsonSite(void)
 {
-    Inverter.CreateUIJson(jsonDoc, Config.hostname);
+    Inverter.CreateUIJson(*jsonOutputDoc, Config.hostname);
 
-    sendJson(jsonDoc);
+    sendJson(jsonOutputDoc);
 }
 
 void sendMetrics(void)
@@ -512,8 +524,8 @@ void sendMetrics(void)
 #if MQTT_SUPPORTED == 1
 boolean sendMqttJson(void)
 {
-    Inverter.CreateJson(jsonDoc, WiFi.macAddress(), "");
-    return shineMqtt.mqttPublish(doc);
+    Inverter.CreateJson(*jsonOutputDoc, WiFi.macAddress(), "");
+    return shineMqtt.mqttPublish(*jsonOutputDoc);
 }
 #endif
 
@@ -553,20 +565,19 @@ void sendPostSite(void)
 #if ENABLE_HTTP_COMMAND_ENDPOINT == 1
 void handleInverterCommand()
 {
-    StaticJsonDocument<1024> req;
-    StaticJsonDocument<1024> res;
+    DynamicJsonDocument req(1024);
     const String& cmd = httpServer.uri().substring(9);
     const String& postData = httpServer.arg(F("plain")).length() > 0 ? httpServer.arg(F("plain")) : F("{}");
     Log.print(F("handleInverterCommand: cmd "));
     Log.println(cmd);
 
-    Inverter.HandleCommand(cmd, (byte*) postData.c_str(), postData.length(), req, res);
+    Inverter.HandleCommand(cmd, (byte*) postData.c_str(), postData.length(), req, *jsonOutputDoc);
 
-    httpServer.setContentLength(measureJson(res));
+    httpServer.setContentLength(measureJson(*jsonOutputDoc));
     httpServer.send(200, F("application/json"), "");
     WiFiClient client = httpServer.client();
     WriteBufferingStream bufferedWifiClient{client, BUFFER_SIZE};
-    serializeJson(res, bufferedWifiClient);
+    serializeJson(*jsonOutputDoc, bufferedWifiClient);
 }
 
 void handleNotFound() {

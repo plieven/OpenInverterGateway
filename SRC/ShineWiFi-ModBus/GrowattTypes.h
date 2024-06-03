@@ -3,10 +3,8 @@
 #include <ArduinoJson.h>
 #include <StreamUtils.h>
 
-#define JSON_DOCUMENT_SIZE 3072
+#define JSON_DOCUMENT_SIZE 4096
 #define BUFFER_SIZE 256
-
-typedef StaticJsonDocument<JSON_DOCUMENT_SIZE> ShineJsonDocument;
 
 typedef enum {
   Undef_stick = 0,
