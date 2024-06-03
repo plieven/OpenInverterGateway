@@ -679,6 +679,7 @@ void Growatt::HandleCommand(const String& command, const byte* payload,
 
   bool success;
   String message;
+    res.clear();
   if (deserializationErr) {
     Log.println("Failed to parse JSON request in command '" + command +
                 "': " + String(deserializationErr.c_str()));
@@ -701,7 +702,7 @@ void Growatt::HandleCommand(const String& command, const byte* payload,
     }
   }
 
-  res.clear();
+  
   res["command"] = command;
   res["success"] = success;
   res["message"] = message;
