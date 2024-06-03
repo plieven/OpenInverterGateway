@@ -460,7 +460,7 @@ double Growatt::getRegValue(sGrowattModbusReg_t* reg) {
   return result;
 }
 
-void Growatt::CreateJson(ShineJsonDocument& doc, const String& MacAddress, const String& Hostname) {
+void Growatt::CreateJson(JsonDocument& doc, const String& MacAddress, const String& Hostname) {
     doc.clear();
     if (!Hostname.isEmpty()) {
         doc["Hostname"] = Hostname;
@@ -498,7 +498,7 @@ void Growatt::CreateJson(ShineJsonDocument& doc, const String& MacAddress, const
   }
 }
 
-void Growatt::CreateUIJson(ShineJsonDocument& doc, const String& Hostname) {
+void Growatt::CreateUIJson(JsonDocument& doc, const String& Hostname) {
 #if SIMULATE_INVERTER != 1
   const char* unitStr[] = {"", "W", "kWh", "V", "A", "s", "%", "Hz", "°C", "VA", "mA", "kOhm"};
   const char* statusStr[] = {"(Waiting)", "(Normal Operation)", "", "(Error)"};
