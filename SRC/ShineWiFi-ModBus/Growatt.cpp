@@ -701,6 +701,7 @@ void Growatt::HandleCommand(const String& command, const byte* payload,
     }
   }
 
+  res.clear();
   res["command"] = command;
   res["success"] = success;
   res["message"] = message;
