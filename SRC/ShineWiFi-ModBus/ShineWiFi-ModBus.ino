@@ -241,6 +241,9 @@ TelnetSerialStream telnetSerialStream = TelnetSerialStream();
 WebSerialStream webSerialStream = WebSerialStream(8080);
 #endif
 
+#include <SyslogStream.h>
+SyslogStream syslogStream = SyslogStream();
+
 void configureLogging() {
     #ifdef ENABLE_SERIAL_DEBUG
         Serial.begin(115200);
@@ -254,6 +257,11 @@ void configureLogging() {
     #ifdef ENABLE_WEB_DEBUG
         Log.addPrintStream(std::make_shared<WebSerialStream>(webSerialStream));
     #endif
+    
+    syslogStream.setDestination("192.168.178.225"); //TODO: make this configurable
+    syslogStream.setRaw(true);
+    const std::shared_ptr<LOGBase> syslogStreamPtr = std::make_shared<SyslogStream>(syslogStream);
+    Log.addPrintStream(syslogStreamPtr);
 }
 
 void setupGPIO() 
@@ -326,6 +334,7 @@ void setup()
 
     loadConfig();
     setupWifiHost();
+    Log.setIdentifier(Config.hostname);
 
     Log.begin();
     startWdt();
