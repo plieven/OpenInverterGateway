@@ -501,6 +501,7 @@ void sendJson(DynamicJsonDocument *doc)
 
 void sendJsonSite(void)
 {
+        unsigned long now = millis();
     Inverter.CreateJson(*jsonOutputDoc, WiFi.macAddress(), Config.hostname);
     Log.print(F("jsonOutputDoc memory usage "));
     Log.print(jsonOutputDoc->memoryUsage());
@@ -508,26 +509,43 @@ void sendJsonSite(void)
     Log.print(jsonOutputDoc->capacity());
     Log.println(F(" bytes"));
     sendJson(jsonOutputDoc);
+        Log.print(millis() - now);
+    Log.println(" ms took sendJsonSite");
 }
 
 void sendUiJsonSite(void)
 {
+        unsigned long now = millis();
     Inverter.CreateUIJson(*jsonOutputDoc, Config.hostname);
-
+    Log.print(millis() - now);
+    Log.println(" ms took Inverter.CreateUIJson");
     sendJson(jsonOutputDoc);
+
+    Log.print(millis() - now);
+    Log.println(" ms took sendJsonUISite");
 }
 
 void sendMetrics(void)
 {
     StringStream metrics;
+    unsigned long now = millis();
     Inverter.CreateMetrics(metrics, WiFi.macAddress(), Config.hostname);
-
+    Log.print(millis() - now);
+    Log.println(" ms took Inverter.CreateMetrics");
     httpServer.setContentLength(metrics.available());
+    Log.print(millis() - now);
+    Log.println(" ms took metrics.available()");
     httpServer.send(200, "text/plain", "");
     WiFiClient client = httpServer.client();
-    WriteBufferingStream bufferedWifiClient{client, BUFFER_SIZE};
-    while (metrics.available())
-        bufferedWifiClient.write(metrics.read());
+    //WriteBufferingStream bufferedWifiClient{client, BUFFER_SIZE};
+    char buffer[BUFFER_SIZE];
+    while (metrics.available()) {
+        int len = metrics.readBytes(buffer, BUFFER_SIZE);
+        client.write(buffer, len);
+    }
+        //bufferedWifiClient.write(metrics.read());
+    Log.print(millis() - now);
+    Log.println(" ms took sendMetrics");
 }
 
 #if MQTT_SUPPORTED == 1
@@ -726,15 +744,19 @@ void loop()
         if (reachable) {
             char buff[32];
             struct tm tm;
-            time_t now = time(&now);
-            localtime_r(&now, &tm);
+            time_t t = time(NULL);
+            localtime_r(&t, &tm);
             strftime (buff, sizeof(buff), "{\"value\":\"%Y-%m-%d %T\"}", &tm);
             StaticJsonDocument<128> req, res;
             Log.println(F("Trying to set inverter datetime..."));
             Log.println(buff);
             Inverter.HandleCommand("datetime/set", (byte*) &buff, strlen(buff), req, res);
             Log.println(String(res["message"]));
+            Log.print("now: ");
+            Log.println(now);
             nextNTPSync = now + 3600000;
+            Log.print("next sync at: ");
+            Log.println(nextNTPSync);
         } else {
             nextNTPSync = now + 5000;
         }
@@ -811,6 +833,8 @@ void loop()
         if (Inverter.GetWiFiStickType() == Undef_stick)
             InverterReconnect();
         WifiRetryTimer = now;
+        Log.print("now: ");
+        Log.println(now);
     }
 
     // Read Inverter every REFRESH_TIMER ms [defined in config.h]
@@ -825,10 +849,13 @@ void loop()
                 #if SIMULATE_INVERTER == 1
                 if (1) // do it always
                 #else
+                unsigned long now = millis();
                 if (Inverter.ReadData()) // get new data from inverter
                 #endif
                 {
-                    Log.println(F("ReadData() successful"));
+                    Log.print(F("ReadData() successful ("));
+                    Log.print(millis() - now);
+                    Log.println(") ms");
                     u16PacketCnt++;
                     u8RetryCounter = NUM_OF_RETRIES;
                     boolean mqttSuccess = false;
