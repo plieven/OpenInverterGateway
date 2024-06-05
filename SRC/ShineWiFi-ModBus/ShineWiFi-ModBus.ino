@@ -741,7 +741,7 @@ void loop()
         Log.print(F(" reachability "));
         int reachable = sntp_getreachability(0);
         Log.println(reachable);
-        if (reachable) {
+        if (reachable & 1) { // last SNTP request was successful
             char buff[32];
             struct tm tm;
             time_t t = time(NULL);
@@ -757,7 +757,13 @@ void loop()
             nextNTPSync = now + 3600000;
             Log.print("next sync at: ");
             Log.println(nextNTPSync);
-        } else {
+        } else if (reachable) { // last SNTP request was NOT successful
+            Log.print("now: ");
+            Log.println(now);
+            nextNTPSync = now + 3600000;
+            Log.print("next sync at: ");
+            Log.println(nextNTPSync);
+        } else { // no SNTP request has been successful yet
             nextNTPSync = now + 5000;
         }
     }
