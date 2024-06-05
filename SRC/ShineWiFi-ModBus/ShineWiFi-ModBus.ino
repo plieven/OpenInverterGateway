@@ -717,11 +717,11 @@ void handlePostData()
 // -------------------------------------------------------
 // Main loop
 // -------------------------------------------------------
-long ButtonTimer = 0;
-long LEDTimer = 0;
-long RefreshTimer = 0;
-long WifiRetryTimer = 0;
-long nextNTPSync = 15000;
+unsigned long ButtonTimer = 0;
+unsigned long LEDTimer = 0;
+unsigned long RefreshTimer = 0;
+unsigned long WifiRetryTimer = 0;
+unsigned long nextNTPSync = 15000;
 
 extern "C" uint8_t sntp_getreachability(uint8_t);
 
@@ -732,7 +732,7 @@ void loop()
     #endif
 
     Log.loop();
-    long now = millis();
+    unsigned long now = millis();
     char readoutSucceeded;
 
     if (now > nextNTPSync) {
