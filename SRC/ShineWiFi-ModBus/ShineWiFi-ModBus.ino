@@ -11,10 +11,9 @@
 #include <WiFiManager.h>
 #include <StreamUtils.h>
 #include <ArduinoOTA.h>
-#include <time.h>
-
-const char* NTP_SERVER = "de.pool.ntp.org";
-const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
+#if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
+    #include <time.h>
+#endif
 
 #ifdef ESP32
     #include <esp_task_wdt.h>
@@ -435,7 +434,9 @@ void setup()
     ArduinoOTA.begin();
     #endif
 
-    configTime(TZ_INFO, NTP_SERVER);
+    #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
+    configTime(DEFAULT_TZ_INFO, DEFAULT_NTP_SERVER);
+    #endif
 }
 
 
@@ -745,7 +746,9 @@ unsigned long ButtonTimer = 0;
 unsigned long LEDTimer = 0;
 unsigned long RefreshTimer = 0;
 unsigned long WifiRetryTimer = 0;
-unsigned long nextNTPSync = 15000;
+#if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
+unsigned long nextNTPSync = 60000; // allow for Wifi to connect and first SNTP sync to happen
+#endif
 
 extern "C" uint8_t sntp_getreachability(uint8_t);
 
@@ -759,38 +762,29 @@ void loop()
     unsigned long now = millis();
     char readoutSucceeded;
 
+    #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
     if (now > nextNTPSync) {
-        Log.print(F("NTP server: "));
-        Log.print(NTP_SERVER);
-        Log.print(F(" reachability "));
         int reachable = sntp_getreachability(0);
-        Log.println(reachable);
+        Log.print(F("NTP server: "));
+        Log.print(DEFAULT_NTP_SERVER);
+        Log.print(F(" reachable "));
+        Log.println(reachable & 1);
         if (reachable & 1) { // last SNTP request was successful
+            StaticJsonDocument<128> req, res;
             char buff[32];
             struct tm tm;
             time_t t = time(NULL);
             localtime_r(&t, &tm);
             strftime (buff, sizeof(buff), "{\"value\":\"%Y-%m-%d %T\"}", &tm);
-            StaticJsonDocument<128> req, res;
-            Log.println(F("Trying to set inverter datetime..."));
+            Log.print(F("Trying to set inverter datetime: "));
             Log.println(buff);
             Inverter.HandleCommand("datetime/set", (byte*) &buff, strlen(buff), req, res);
             Log.println(String(res["message"]));
-            Log.print("now: ");
-            Log.println(now);
-            nextNTPSync = now + 3600000;
-            Log.print("next sync at: ");
-            Log.println(nextNTPSync);
-        } else if (reachable) { // last SNTP request was NOT successful
-            Log.print("now: ");
-            Log.println(now);
-            nextNTPSync = now + 3600000;
-            Log.print("next sync at: ");
-            Log.println(nextNTPSync);
-        } else { // no SNTP request has been successful yet
-            nextNTPSync = now + 5000;
         }
+        nextNTPSync = now + 3600000;
     }
+    #endif
+
 #ifdef AP_BUTTON_PRESSED
     if ((now - ButtonTimer) > BUTTON_TIMER)
     {
