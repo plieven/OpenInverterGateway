@@ -503,6 +503,8 @@ void sendJsonSite(void)
 {
         unsigned long now = millis();
     Inverter.CreateJson(*jsonOutputDoc, WiFi.macAddress(), Config.hostname);
+        Log.print(millis() - now);
+    Log.println(" ms took Inverter.CreateJson");
     Log.print(F("jsonOutputDoc memory usage "));
     Log.print(jsonOutputDoc->memoryUsage());
     Log.print(F(" of "));
@@ -511,6 +513,22 @@ void sendJsonSite(void)
     sendJson(jsonOutputDoc);
         Log.print(millis() - now);
     Log.println(" ms took sendJsonSite");
+}
+
+bool sendSingleJsonValue(void)
+{
+    DynamicJsonDocument doc(JSON_DOCUMENT_SIZE); // slow?
+    const String& key = httpServer.uri().substring(7);
+        unsigned long now = millis();
+    Inverter.CreateJson(doc, WiFi.macAddress(), Config.hostname);
+        Log.print(millis() - now);
+    Log.println(" ms took Inverter.CreateJson");
+    if (doc.containsKey(key)) {
+        WiFiClient client = httpServer.client();
+        client.write(String(doc[key]).c_str());
+        return true;
+    }
+    return false;
 }
 
 void sendUiJsonSite(void)
@@ -612,6 +630,12 @@ void handleNotFound() {
         httpServer.uri().length() > 9) {
         handleInverterCommand();
         return;
+    }
+    if (httpServer.uri().startsWith(F("/value/")) &&
+        httpServer.uri().length() > 7) {
+        if (sendSingleJsonValue()) {
+            return;
+        }
     }
     httpServer.send(404, F("text/plain"), String(F("Not found: ") + httpServer.uri()));
 }
