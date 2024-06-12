@@ -140,7 +140,7 @@ void WiFi_Reconnect()
         Log.print(F("local IP:"));
         Log.println(WiFi.localIP());
         Log.print(F("Hostname: "));
-        Log.println(HOSTNAME);
+        Log.println(DEFAULT_HOSTNAME);
 
         Log.println(F("WiFi reconnected"));
 
@@ -173,7 +173,7 @@ void setupWifiManagerConfigMenu();
 
 void loadConfig()
 {
-    Config.hostname = prefs.getString(ConfigFiles.hostname, HOSTNAME);
+    Config.hostname = prefs.getString(ConfigFiles.hostname, DEFAULT_HOSTNAME);
     Config.static_ip = prefs.getString(ConfigFiles.static_ip, "");
     Config.static_netmask = prefs.getString(ConfigFiles.static_netmask, "");
     Config.static_gateway = prefs.getString(ConfigFiles.static_gateway, "");
@@ -209,7 +209,7 @@ void saveParamCallback()
 
     Config.hostname = customWMParams.hostname->getValue();
     if (Config.hostname.isEmpty()) {
-        Config.hostname = HOSTNAME;
+        Config.hostname = DEFAULT_HOSTNAME;
     }
     Config.static_ip = customWMParams.static_ip->getValue();
     Config.static_netmask = customWMParams.static_netmask->getValue();
