@@ -619,7 +619,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
           3169,    0,     SIZE_16BIT, F("BDCBatteryVoltage"), 0.1, 0.1,
           VOLTAGE, true, false};
     Protocol.InputRegisters[P124_BDC_IBAT] = sGrowattModbusReg_t{
-        3170,       0,     SIZE_16BIT, F("BDCBatteryCurrent"), 0.1, 0.1,
+        3170,       0,     SIZE_16BIT_S, F("BDCBatteryCurrent"), 0.1, 0.1,
         CURRENT, true, false};
       Protocol.InputRegisters[P124_BDC_SOC] = sGrowattModbusReg_t{
           3171, 0, SIZE_16BIT, F("BDCStateOfCharge"), 1, 1, PERCENTAGE, true, false};
