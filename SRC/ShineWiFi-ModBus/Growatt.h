@@ -45,7 +45,7 @@ class Growatt {
   double getRegValue(sGrowattModbusReg_t* reg);
   void camelCaseToSnakeCase(const String& input, char* output);
   void metricsAddValue(const String& name, double value, StringStream& metrics,
-                       const String& MacAddress, const String& Hostname);
+                       const String& labels);
   std::tuple<bool, String> handleEcho(const JsonDocument& req,
                                       JsonDocument& res, Growatt& inverter);
   std::tuple<bool, String> handleCommandList(const JsonDocument& req,

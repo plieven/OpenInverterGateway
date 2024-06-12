@@ -33,10 +33,6 @@
 // be executed as HTTP POST with JSON encoded parameters in the body.
 #define ENABLE_HTTP_COMMAND_ENDPOINT 0
 
-// Enable the addition of a name label (set to the hostname) to the metrics export.
-// Be careful, changing this setting will create a new series in Prometheus.
-#define ENABLE_METRICS_NAME_LABEL 0
-
 // Setting this define to 1 will ping the default gateway periodically
 // if the ping is not successful, the wifi connection will be reestablished
 #define PINGER_SUPPORTED 0
