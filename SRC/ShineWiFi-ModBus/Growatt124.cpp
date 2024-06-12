@@ -362,7 +362,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
 #if ENABLE_VERSION124_IREG3000 == 1
     // FRAGMENT 1: BEGIN
     Protocol.InputRegisters[P124_INVERTER_STATUS] = sGrowattModbusReg_t{
-        3000, 0, SIZE_16BIT, F("InverterStatus"), 1, 1, NONE, true, false}; //TODO: handle lower bits only
+        3000, 0, SIZE_16BIT, F("InverterStatus"), 1, 1, NONE, true, false};
     Protocol.InputRegisters[P124_PPV] = sGrowattModbusReg_t{
         3001, 0, SIZE_32BIT, F("PVTotalPower"), 0.1, 0.1, POWER_W, true, true};
     Protocol.InputRegisters[P124_VPV1] =
@@ -403,7 +403,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         POWER_W, false, false};
     Protocol.InputRegisters[P124_PSYS] = sGrowattModbusReg_t{
         3019,      0,    SIZE_32BIT_S, F("SystemOutputPower"), 0.1, 0.1,
-        POWER_W, true, true};
+        POWER_W, false, false};
     Protocol.InputRegisters[P124_QAC] = sGrowattModbusReg_t{
         3021,      0,    SIZE_32BIT_S, F("ReactivePower"), 0.1, 0.1,
         POWER_W, true, true};
@@ -559,7 +559,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         VOLTAGE, false, false};
     Protocol.InputRegisters[P124_IPF] = sGrowattModbusReg_t{
         3100,      0,     SIZE_16BIT, F("InverterOutputPFNow"), 1, 1,
-        NONE, true, false};
+        NONE, false, false};
     Protocol.InputRegisters[P124_REALOPPERCENT] = sGrowattModbusReg_t{
         3101, 0, SIZE_16BIT, F("RealOutputPercent"), 1, 1, PERCENTAGE, true, false};
     Protocol.InputRegisters[P124_OPFULLWATT] = sGrowattModbusReg_t{
@@ -569,17 +569,17 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
       Protocol.InputRegisters[P124_WARN_MAINCODE] = sGrowattModbusReg_t{
           3106, 0, SIZE_16BIT, F("InverterWarnMaincode"), 1, 1, NONE, true, false};
     Protocol.InputRegisters[P124_AFCI_STATUS] = sGrowattModbusReg_t{
-        3112, 0, SIZE_16BIT, F("AFCIStatus"), 1, 1, NONE, true, false};
+        3112, 0, SIZE_16BIT, F("AFCIStatus"), 1, 1, NONE, false, false};
     Protocol.InputRegisters[P124_INV_START_DELAY] = sGrowattModbusReg_t{
-        3115, 0, SIZE_16BIT, F("InvStartDelayTime"), 1, 1, SECONDS, true, false};
+        3115, 0, SIZE_16BIT, F("InvStartDelayTime"), 1, 1, SECONDS, false, false};
     Protocol.InputRegisters[P124_BDC_ONOFFSTATE] = sGrowattModbusReg_t{
         3118, 0, SIZE_16BIT, F("BDCConnectState"), 1, 1, NONE, true, false};
     Protocol.InputRegisters[P124_DRYCONTACTSTATE] = sGrowattModbusReg_t{
-        3119, 0, SIZE_16BIT, F("DryContactState"), 1, 1, NONE, true, false};
+        3119, 0, SIZE_16BIT, F("DryContactState"), 1, 1, NONE, false, false};
     Protocol.InputRegisters[P124_PSELF] = sGrowattModbusReg_t{
-        3121, 0, SIZE_32BIT, F("SelfUsePower"), 0.1, 0.1, POWER_W, true, true};
+        3121, 0, SIZE_32BIT, F("SelfUsePower"), 0.1, 0.1, POWER_W, false, false};
     Protocol.InputRegisters[P124_ESYS_TODAY] = sGrowattModbusReg_t{
-        3123, 0, SIZE_32BIT, F("SystemEnergyToday"), 0.1, 0.1, POWER_KWH, true, false};
+        3123, 0, SIZE_32BIT, F("SystemEnergyToday"), 0.1, 0.1, POWER_KWH, false, false};
     // FRAGMENT 2: END
 
     // FRAGMENT 3: BEGIN
@@ -596,27 +596,29 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     Protocol.InputRegisters[P124_EACCHR_TOTAL] = sGrowattModbusReg_t{
         3135, 0, SIZE_32BIT, F("ACChargeEnergyTotal"), 0.1, 0.1, POWER_KWH, true, false};
     Protocol.InputRegisters[P124_ESYS_TOTAL] = sGrowattModbusReg_t{
-        3137, 0, SIZE_32BIT, F("SystemEnergyTotal"), 0.1, 0.1, POWER_KWH, true, false};
+        3137, 0, SIZE_32BIT, F("SystemEnergyTotal"), 0.1, 0.1, POWER_KWH, false, false};
     Protocol.InputRegisters[P124_ESELF_TODAY] = sGrowattModbusReg_t{
-        3139, 0, SIZE_32BIT, F("SelfOutputEnergyToday"), 0.1, 0.1, POWER_KWH, true, false};
+        3139, 0, SIZE_32BIT, F("SelfOutputEnergyToday"), 0.1, 0.1, POWER_KWH, false, false};
     Protocol.InputRegisters[P124_ESELF_TOTAL] = sGrowattModbusReg_t{
-        3141, 0, SIZE_32BIT, F("SelfOutputEnergyTotal"), 0.1, 0.1, POWER_KWH, true, false};
+        3141, 0, SIZE_32BIT, F("SelfOutputEnergyTotal"), 0.1, 0.1, POWER_KWH, false, false};
     Protocol.InputRegisters[P124_PRIORITY] = sGrowattModbusReg_t{
         3144, 0, SIZE_16BIT, F("Priority"), 1, 1, NONE, true, false};
     Protocol.InputRegisters[P124_BDC_DERATINGMODE] = sGrowattModbusReg_t{
         3165, 0, SIZE_16BIT, F("BDCDeratingMode"), 1, 1, NONE, true, false};
-    Protocol.InputRegisters[P124_BDC_SYSSTATE_MODE] = sGrowattModbusReg_t{
-        3166, 0, SIZE_16BIT, F("BDCSysStateMode"), 1, 1, NONE, true, false}; //TODO: handle upper and lower bits seperately
+    Protocol.InputRegisters[P124_BDC_SYSSTATE] = sGrowattModbusReg_t{
+        3166, 0, SIZE_16BIT, F("BDCSysState"), 1, 1, NONE, true, false};
+    Protocol.InputRegisters[P124_BDC_SYSMODE] = sGrowattModbusReg_t{
+        3166, 0, SIZE_16BIT, F("BDCSysMode"), 1, 1, NONE, true, false};
     Protocol.InputRegisters[P124_BDC_FAULTCODE] = sGrowattModbusReg_t{
         3167, 0, SIZE_16BIT, F("BDCFaultCode"), 1, 1, NONE, true, false};
     Protocol.InputRegisters[P124_BDC_WARNCODE] = sGrowattModbusReg_t{
         3168, 0, SIZE_16BIT, F("BDCWarnCode"), 1, 1, NONE, true, false};
       Protocol.InputRegisters[P124_BDC_VBAT] = sGrowattModbusReg_t{
           3169,    0,     SIZE_16BIT, F("BDCBatteryVoltage"), 0.1, 0.1,
-          VOLTAGE, false, false};
+          VOLTAGE, true, false};
     Protocol.InputRegisters[P124_BDC_IBAT] = sGrowattModbusReg_t{
         3170,       0,     SIZE_16BIT, F("BDCBatteryCurrent"), 0.1, 0.1,
-        CURRENT, false, false};
+        CURRENT, true, false};
       Protocol.InputRegisters[P124_BDC_SOC] = sGrowattModbusReg_t{
           3171, 0, SIZE_16BIT, F("BDCStateOfCharge"), 1, 1, PERCENTAGE, true, false};
     Protocol.InputRegisters[P124_BDC_VBUS1] = sGrowattModbusReg_t{
@@ -626,10 +628,10 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3173,       0,     SIZE_16BIT, F("BDCOnTheBusVoltage"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_BDC_IBB] = sGrowattModbusReg_t{
-        3174,       0,     SIZE_16BIT, F("BDCBUCKBoostCurrent"), 0.1, 0.1,
+        3174,       0,     SIZE_16BIT, F("BDCBuckBoostCurrent"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_BDC_ILLC] = sGrowattModbusReg_t{
-        3175,       0,     SIZE_16BIT, F("BDCLLCCurrent"), 0.1, 0.1,
+        3175,       0,     SIZE_16BIT, F("BDCLlcCurrent"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_BDC_TEMPA] = sGrowattModbusReg_t{
         3176,          0,    SIZE_16BIT, F("BDCTemperatureA"), 0.1, 0.1,
