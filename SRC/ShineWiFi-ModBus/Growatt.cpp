@@ -198,6 +198,7 @@ bool Growatt::ReadInputRegisters() {
   }
 #if ENABLE_VERSION124_IREG3000 == 1
     _Protocol.InputRegisters[P124_INVERTER_STATUS].value &= 0xff;
+    _Protocol.InputRegisters[P124_INVERTER_RUNSTATE].value >>= 8;
     _Protocol.InputRegisters[P124_BDC_SYSSTATE].value &= 0xff;
     _Protocol.InputRegisters[P124_BDC_SYSMODE].value >>= 8;
 #endif

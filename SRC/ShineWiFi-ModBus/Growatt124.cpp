@@ -363,6 +363,8 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     // FRAGMENT 1: BEGIN
     Protocol.InputRegisters[P124_INVERTER_STATUS] = sGrowattModbusReg_t{
         3000, 0, SIZE_16BIT, F("InverterStatus"), 1, 1, NONE, true, false};
+    Protocol.InputRegisters[P124_INVERTER_RUNSTATE] = sGrowattModbusReg_t{
+        3000, 0, SIZE_16BIT, F("InverterRunState"), 1, 1, NONE, false, false};
     Protocol.InputRegisters[P124_PPV] = sGrowattModbusReg_t{
         3001, 0, SIZE_32BIT, F("PVTotalPower"), 0.1, 0.1, POWER_W, true, true};
     Protocol.InputRegisters[P124_VPV1] =
@@ -646,9 +648,9 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
           sGrowattModbusReg_t{3180,    0,    SIZE_32BIT, F("BDCChargePower"), 0.1, 0.1,
                               POWER_W, true, true};
     Protocol.InputRegisters[P124_BDC_EDISCHR_TOTAL] = sGrowattModbusReg_t{
-        3182, 0, SIZE_32BIT, F("BDCDischargeEnergyTotal"), 0.1, 0.1, POWER_KWH, true, false};
+        3182, 0, SIZE_32BIT, F("BDCDischargeEnergyTotal"), 0.1, 0.1, POWER_KWH, false, false};
     Protocol.InputRegisters[P124_BDC_ECHR_TOTAL] = sGrowattModbusReg_t{
-        3184, 0, SIZE_32BIT, F("BDCChargeEnergyTotal"), 0.1, 0.1, POWER_KWH, true, false};
+        3184, 0, SIZE_32BIT, F("BDCChargeEnergyTotal"), 0.1, 0.1, POWER_KWH, false, false};
     // FRAGMENT 3: END
     
     Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3000, 63};
