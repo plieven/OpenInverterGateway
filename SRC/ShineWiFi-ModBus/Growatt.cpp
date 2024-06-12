@@ -511,7 +511,7 @@ void Growatt::CreateUIJson(JsonDocument& doc, const String& Hostname) {
   const int statusStrLength = sizeof(statusStr) / sizeof(char*);
   const char* priorityStr[] = {"(Load First)", "(Battery First)", "(Grid First)"};
   const int priorityStrLength = sizeof(priorityStr) / sizeof(char*);
-  const char* bdcModeStr[] = {"(idle)", "(charging)", "(decharging)"};
+  const char* bdcModeStr[] = {"(idle)", "(charging)", "(discharging)"};
   const int bdcModeStrLength = sizeof(bdcModeStr) / sizeof(char*);
 
   if (!Hostname.isEmpty()) {
