@@ -196,7 +196,12 @@ bool Growatt::ReadInputRegisters() {
       return false;
     }
   }
-  return true;
+#if ENABLE_VERSION124_IREG3000 == 1
+    _Protocol.InputRegisters[P124_INVERTER_STATUS].value &= 0xff;
+    _Protocol.InputRegisters[P124_BDC_SYSSTATE].value &= 0xff;
+    _Protocol.InputRegisters[P124_BDC_SYSMODE].value >>= 8;
+#endif
+    return true;
 }
 
 bool Growatt::ReadHoldingRegisters() {
@@ -504,6 +509,10 @@ void Growatt::CreateUIJson(JsonDocument& doc, const String& Hostname) {
   const char* unitStr[] = {"", "W", "kWh", "V", "A", "s", "%", "Hz", "°C", "VA", "mA", "kOhm"};
   const char* statusStr[] = {"(Waiting)", "(Normal Operation)", "", "(Error)"};
   const int statusStrLength = sizeof(statusStr) / sizeof(char*);
+  const char* priorityStr[] = {"(Load First)", "(Battery First)", "(Grid First)"};
+  const int priorityStrLength = sizeof(priorityStr) / sizeof(char*);
+  const char* bdcModeStr[] = {"(idle)", "(charging)", "(decharging)"};
+  const int bdcModeStrLength = sizeof(bdcModeStr) / sizeof(char*);
 
     doc.clear();
   if (!Hostname.isEmpty()) {
@@ -520,11 +529,18 @@ void Growatt::CreateUIJson(JsonDocument& doc, const String& Hostname) {
 
       // value
       arr.add(getRegValue(&_Protocol.InputRegisters[i]));
-
-      if (String(_Protocol.InputRegisters[i].name) == F("InverterStatus") &&
+        
+      if ((String(_Protocol.InputRegisters[i].name) == F("InverterStatus") ||
+           String(_Protocol.InputRegisters[i].name) == F("BDCSysState")) &&
           _Protocol.InputRegisters[i].value < statusStrLength) {
         arr.add(statusStr[_Protocol.InputRegisters[i].value]);  // use unit for
                                                                 // status
+      } else if (String(_Protocol.InputRegisters[i].name) == F("BDCSysMode") &&
+                    _Protocol.InputRegisters[i].value < bdcModeStrLength) {
+                  arr.add(bdcModeStr[_Protocol.InputRegisters[i].value]);
+      } else if (String(_Protocol.InputRegisters[i].name) == F("Priority") &&
+                 _Protocol.InputRegisters[i].value < priorityStrLength) {
+               arr.add(priorityStr[_Protocol.InputRegisters[i].value]);
       } else {
         arr.add(unitStr[_Protocol.InputRegisters[i].unit]);  // unit
       }
