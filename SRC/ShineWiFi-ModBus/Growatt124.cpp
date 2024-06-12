@@ -651,7 +651,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     
     Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3000, 63};
     Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3063, 62};
-    Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3125, 50};
+    Protocol.InputReadFragments[Protocol.InputFragmentCount++] = sGrowattReadFragment_t{3125, 61};
 #else
     // FRAGMENT 1: BEGIN
     Protocol.InputRegisters[P124_I_STATUS] = sGrowattModbusReg_t{
