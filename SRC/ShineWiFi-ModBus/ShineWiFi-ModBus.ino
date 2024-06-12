@@ -117,8 +117,6 @@ struct {
 
 #define CONFIG_PORTAL_MAX_TIME_SECONDS 300
 
-DynamicJsonDocument *jsonOutputDoc;
-
 // -------------------------------------------------------
 // Check the WiFi status and reconnect if necessary
 // -------------------------------------------------------
@@ -394,13 +392,6 @@ void setup()
     Log.print("Max Heap: ");
     Log.println(ESP.getMaxFreeBlockSize());
 
-    jsonOutputDoc = new DynamicJsonDocument(JSON_DOCUMENT_SIZE);
-
-    Log.print("Free Heap: ");
-    Log.println(ESP.getFreeHeap());
-    Log.print("Max Heap: ");
-    Log.println(ESP.getMaxFreeBlockSize());
-
     #if MQTT_SUPPORTED == 1
         #ifdef MQTTS_ENABLED
             espClient.setCACert(MQTTS_BROKER_CA_CERT);
@@ -491,42 +482,55 @@ void setupMenu(bool enableCustomParams){
     wm.setMenu(menu); // custom menu, pass vector
 }
 
-void sendJson(DynamicJsonDocument *doc)
+void sendJson(JsonDocument& doc)
 {
-    httpServer.setContentLength(measureJson(*doc));
+    httpServer.setContentLength(measureJson(doc));
     httpServer.send(200, "application/json", "");
     WiFiClient client = httpServer.client();
     WriteBufferingStream bufferedWifiClient{client, BUFFER_SIZE};
-    serializeJson(*doc, bufferedWifiClient);
+    serializeJson(doc, bufferedWifiClient);
 }
 
 void sendJsonSite(void)
 {
         unsigned long now = millis();
-    Inverter.CreateJson(*jsonOutputDoc, WiFi.macAddress(), Config.hostname);
+           Log.print("Free Heap: ");
+    Log.println(ESP.getFreeHeap());
+    Log.print("Max Heap: ");
+    Log.println(ESP.getMaxFreeBlockSize());
+    ShineJsonDocument(doc);
+    Inverter.CreateJson(doc, WiFi.macAddress(), Config.hostname);
         Log.print(millis() - now);
     Log.println(" ms took Inverter.CreateJson");
-    Log.print(F("jsonOutputDoc memory usage "));
-    Log.print(jsonOutputDoc->memoryUsage());
+    Log.print(F("ShineJsonDocument memory usage "));
+    Log.print(doc.memoryUsage());
     Log.print(F(" of "));
-    Log.print(jsonOutputDoc->capacity());
+    Log.print(doc.capacity());
     Log.println(F(" bytes"));
-    sendJson(jsonOutputDoc);
+    sendJson(doc);
         Log.print(millis() - now);
     Log.println(" ms took sendJsonSite");
 }
 
 bool sendSingleJsonValue(void)
 {
-    DynamicJsonDocument doc(JSON_DOCUMENT_SIZE); // slow?
+    
     const String& key = httpServer.uri().substring(7);
         unsigned long now = millis();
+            Log.print("Free Heap: ");
+    Log.println(ESP.getFreeHeap());
+    Log.print("Max Heap: ");
+    Log.println(ESP.getMaxFreeBlockSize());
+            ShineJsonDocument(doc);
+
     Inverter.CreateJson(doc, WiFi.macAddress(), Config.hostname);
         Log.print(millis() - now);
     Log.println(" ms took Inverter.CreateJson");
     if (doc.containsKey(key)) {
         WiFiClient client = httpServer.client();
         client.write(String(doc[key]).c_str());
+        Log.print(millis() - now);
+        Log.println(" ms took sendSingleJsonValue");
         return true;
     }
     return false;
@@ -535,10 +539,15 @@ bool sendSingleJsonValue(void)
 void sendUiJsonSite(void)
 {
         unsigned long now = millis();
-    Inverter.CreateUIJson(*jsonOutputDoc, Config.hostname);
+            Log.print("Free Heap: ");
+    Log.println(ESP.getFreeHeap());
+    Log.print("Max Heap: ");
+    Log.println(ESP.getMaxFreeBlockSize());
+            ShineJsonDocument(doc);
+    Inverter.CreateUIJson(doc, Config.hostname);
     Log.print(millis() - now);
     Log.println(" ms took Inverter.CreateUIJson");
-    sendJson(jsonOutputDoc);
+    sendJson(doc);
 
     Log.print(millis() - now);
     Log.println(" ms took sendJsonUISite");
@@ -570,8 +579,9 @@ void sendMetrics(void)
 #if MQTT_SUPPORTED == 1
 boolean sendMqttJson(void)
 {
-    Inverter.CreateJson(*jsonOutputDoc, WiFi.macAddress(), "");
-    return shineMqtt.mqttPublish(*jsonOutputDoc);
+    ShineJsonDocument(doc);
+    Inverter.CreateJson(doc, WiFi.macAddress(), "");
+    return shineMqtt.mqttPublish(doc);
 }
 #endif
 
@@ -611,19 +621,19 @@ void sendPostSite(void)
 #if ENABLE_HTTP_COMMAND_ENDPOINT == 1
 void handleInverterCommand()
 {
-    DynamicJsonDocument req(1024);
+    StaticJsonDocument<1024> req, res;
     const String& cmd = httpServer.uri().substring(9);
     const String& postData = httpServer.arg(F("plain")).length() > 0 ? httpServer.arg(F("plain")) : F("{}");
     Log.print(F("handleInverterCommand: cmd "));
     Log.println(cmd);
 
-    Inverter.HandleCommand(cmd, (byte*) postData.c_str(), postData.length(), req, *jsonOutputDoc);
+    Inverter.HandleCommand(cmd, (byte*) postData.c_str(), postData.length(), req, res);
 
-    httpServer.setContentLength(measureJson(*jsonOutputDoc));
+    httpServer.setContentLength(measureJson(res));
     httpServer.send(200, F("application/json"), "");
     WiFiClient client = httpServer.client();
     WriteBufferingStream bufferedWifiClient{client, BUFFER_SIZE};
-    serializeJson(*jsonOutputDoc, bufferedWifiClient);
+    serializeJson(res, bufferedWifiClient);
 }
 
 void handleNotFound() {

@@ -468,7 +468,6 @@ double Growatt::getRegValue(sGrowattModbusReg_t* reg) {
 }
 
 void Growatt::CreateJson(JsonDocument& doc, const String& MacAddress, const String& Hostname) {
-    doc.clear();
     if (!Hostname.isEmpty()) {
         doc["Hostname"] = Hostname;
     }
@@ -515,7 +514,6 @@ void Growatt::CreateUIJson(JsonDocument& doc, const String& Hostname) {
   const char* bdcModeStr[] = {"(idle)", "(charging)", "(decharging)"};
   const int bdcModeStrLength = sizeof(bdcModeStr) / sizeof(char*);
 
-    doc.clear();
   if (!Hostname.isEmpty()) {
     JsonArray arr = doc.createNestedArray("Hostname");
     arr.add(Hostname);
@@ -697,7 +695,7 @@ void Growatt::HandleCommand(const String& command, const byte* payload,
 
   bool success;
   String message;
-    res.clear();
+
   if (deserializationErr) {
     Log.println("Failed to parse JSON request in command '" + command +
                 "': " + String(deserializationErr.c_str()));

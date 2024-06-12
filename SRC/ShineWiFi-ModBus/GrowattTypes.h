@@ -3,8 +3,18 @@
 #include <ArduinoJson.h>
 #include <StreamUtils.h>
 
+#if ENABLE_VERSION124_IREG3000 == 1
 #define JSON_DOCUMENT_SIZE 4096
+#else
+#define JSON_DOCUMENT_SIZE 2048
+#endif
 #define BUFFER_SIZE 256
+
+#if JSON_DOCUMENT_SIZE > 2048
+#define ShineJsonDocument(variable) DynamicJsonDocument variable(JSON_DOCUMENT_SIZE)
+#else
+#define ShineJsonDocument(variable) StaticJsonDocument<JSON_DOCUMENT_SIZE> variable
+#endif
 
 typedef enum {
   Undef_stick = 0,
