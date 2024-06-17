@@ -374,7 +374,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3004,       0,     SIZE_16BIT, F("PV1InputCurrent"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_PPV1] = sGrowattModbusReg_t{
-        3005,       0,     SIZE_32BIT, F("PV1InputPower"), 0.1, 0.1,
+        3005,       0,     SIZE_32BIT, F("PV1Power"), 0.1, 0.1,
         POWER_W, false, false};
     Protocol.InputRegisters[P124_VPV2] =
     sGrowattModbusReg_t{3007,       0,     SIZE_16BIT, F("PV2Voltage"), 0.1, 0.1,
@@ -383,7 +383,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3008,       0,     SIZE_16BIT, F("PV2InputCurrent"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_PPV2] = sGrowattModbusReg_t{
-        3009,       0,     SIZE_32BIT, F("PV2InputPower"), 0.1, 0.1,
+        3009,       0,     SIZE_32BIT, F("PV2Power"), 0.1, 0.1,
         POWER_W, false, false};
     Protocol.InputRegisters[P124_VPV3] =
     sGrowattModbusReg_t{3011,       0,     SIZE_16BIT, F("PV3Voltage"), 0.1, 0.1,
@@ -392,7 +392,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3012,       0,     SIZE_16BIT, F("PV3InputCurrent"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_PPV3] = sGrowattModbusReg_t{
-        3013,       0,     SIZE_32BIT, F("PV3InputPower"), 0.1, 0.1,
+        3013,       0,     SIZE_32BIT, F("PV3Power"), 0.1, 0.1,
         POWER_W, false, false};
     Protocol.InputRegisters[P124_VPV4] =
     sGrowattModbusReg_t{3015,       0,     SIZE_16BIT, F("PV4Voltage"), 0.1, 0.1,
@@ -401,7 +401,7 @@ void init_growatt124(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3016,       0,     SIZE_16BIT, F("PV4InputCurrent"), 0.1, 0.1,
         CURRENT, false, false};
     Protocol.InputRegisters[P124_PPV4] = sGrowattModbusReg_t{
-        3017,       0,     SIZE_32BIT, F("PV4InputPower"), 0.1, 0.1,
+        3017,       0,     SIZE_32BIT, F("PV4Power"), 0.1, 0.1,
         POWER_W, false, false};
     Protocol.InputRegisters[P124_PSYS] = sGrowattModbusReg_t{
         3019,      0,    SIZE_32BIT_S, F("SystemOutputPower"), 0.1, 0.1,
