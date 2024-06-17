@@ -529,8 +529,7 @@ bool sendSingleJsonValue(void)
         Log.print(millis() - now);
     Log.println(" ms took Inverter.CreateJson");
     if (doc.containsKey(key)) {
-        WiFiClient client = httpServer.client();
-        client.write(String(doc[key]).c_str());
+        httpServer.send(200, "text/plain", doc[key].as<String>());
         Log.print(millis() - now);
         Log.println(" ms took sendSingleJsonValue");
         return true;
