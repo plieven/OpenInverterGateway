@@ -76,8 +76,6 @@ std::tuple<bool, String> updateDateTime(const JsonDocument& req,
   }
 };
 
-// getLoadFirst, setLoadFirstStopSOC for 3000 mode
-
 std::tuple<String, String> getTimeSlot(uint16_t start, uint16_t stop) {
   int start_hours = (start >> 8) & 0xFF;
   int start_minutes = start & 0xFF;
