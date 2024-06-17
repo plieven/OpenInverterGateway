@@ -15,6 +15,8 @@
 #include "Growatt124.h"
 #elif GROWATT_MODBUS_VERSION == 305
 #include "Growatt305.h"
+#elif GROWATT_MODBUS_VERSION == 3000
+#include "GrowattTLXH.h"
 #elif GROWATT_MODBUS_VERSION == 5000
 #include "GrowattSPF.h"
 #elif GROWATT_MODBUS_VERSION == 6000
@@ -65,6 +67,8 @@ void Growatt::InitProtocol() {
   init_growatt124(_Protocol, *this);
 #elif GROWATT_MODBUS_VERSION == 305
   init_growatt305(_Protocol, *this);
+#elif GROWATT_MODBUS_VERSION == 3000
+  init_growattTLXH(_Protocol, *this);
 #elif GROWATT_MODBUS_VERSION == 5000
   init_growattSPF(_Protocol, *this);
 #elif GROWATT_MODBUS_VERSION == 6000
@@ -196,11 +200,11 @@ bool Growatt::ReadInputRegisters() {
       return false;
     }
   }
-#if ENABLE_VERSION124_IREG3000 == 1
-    _Protocol.InputRegisters[P124_INVERTER_STATUS].value &= 0xff;
-    _Protocol.InputRegisters[P124_INVERTER_RUNSTATE].value >>= 8;
-    _Protocol.InputRegisters[P124_BDC_SYSSTATE].value &= 0xff;
-    _Protocol.InputRegisters[P124_BDC_SYSMODE].value >>= 8;
+#if GROWATT_MODBUS_VERSION == 3000
+    _Protocol.InputRegisters[P3000_INVERTER_STATUS].value &= 0xff;
+    _Protocol.InputRegisters[P3000_INVERTER_RUNSTATE].value >>= 8;
+    _Protocol.InputRegisters[P3000_BDC_SYSSTATE].value &= 0xff;
+    _Protocol.InputRegisters[P3000_BDC_SYSMODE].value >>= 8;
 #endif
     return true;
 }

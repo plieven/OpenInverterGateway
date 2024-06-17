@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 #include <StreamUtils.h>
 
-#if ENABLE_VERSION124_IREG3000 == 1
+#if GROWATT_MODBUS_VERSION == 3000
 #define JSON_DOCUMENT_SIZE 4096
 #else
 #define JSON_DOCUMENT_SIZE 2048
