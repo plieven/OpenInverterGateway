@@ -6,6 +6,50 @@
 #include "GrowattTLXH.h"
 #include <TLog.h>
 
+std::tuple<bool, String> setBDCDischargeStopSOC(const JsonDocument& req,
+                                            JsonDocument& res,
+                                            Growatt& inverter) {
+  if (!req.containsKey("value")) {
+    return std::make_tuple(false, "'value' field is required");
+  }
+
+  uint16_t value = req["value"].as<uint16_t>();
+
+  if (!((value >= 0 && value <= 100))) {
+    return std::make_tuple(false, "'value' field not in range");
+  }
+
+#if SIMULATE_INVERTER != 1
+  if (!inverter.WriteHoldingReg(3037, value)) {
+    return std::make_tuple(false, "Failed to write active rate");
+  }
+#endif
+
+  return std::make_tuple(true, "Successfully updated BDCDischargeStopSOC");
+};
+
+std::tuple<bool, String> setBDCDischargePowerRate(const JsonDocument& req,
+                                            JsonDocument& res,
+                                            Growatt& inverter) {
+  if (!req.containsKey("value")) {
+    return std::make_tuple(false, "'value' field is required");
+  }
+
+  uint16_t value = req["value"].as<uint16_t>();
+
+  if (!((value >= 0 && value <= 100))) {
+    return std::make_tuple(false, "'value' field not in range");
+  }
+
+#if SIMULATE_INVERTER != 1
+  if (!inverter.WriteHoldingReg(3036, value)) {
+    return std::make_tuple(false, "Failed to write active rate");
+  }
+#endif
+
+  return std::make_tuple(true, "Successfully updated BDCDischargePowerRate");
+};
+
 void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     // definition of input registers
     Protocol.InputRegisterCount = P3000_INPUT_REGISTER_COUNT;
@@ -315,9 +359,37 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3, 0, SIZE_16BIT, F("ActivePowerRate"), 1, 1, PERCENTAGE, true, false};
     // FRAGMENT 1: END
 
-    Protocol.HoldingFragmentCount = 1;
+    // FRAGMENT 2: BEGIN
+    // The BDCDischargePowerRate seems to apply to grid first AND load first mode.
+    // The BDCDischargeStopSOC applies to grid first mode AND also to load first mode
+    // XXX: if BDCLoadFristStopSOCEnabled is enabled.
+    // The BDCChargePowerRate seems to apply to battery first AND load first mode.
+    // The BDCChargeStopSOC applies to battery first mode AND also to load first mode
+    // XXX: if BDCLoadFristStopSOCEnabled is enabled.
+    // XXX: If BDCChargeACEnabled is enabled the battery is charged up to ... in xxx modes.
+    Protocol.HoldingRegisters[P3000_BDC_DISCHARGE_P_RATE] = sGrowattModbusReg_t{
+        3036, 0, SIZE_16BIT, F("BDCDischargePowerRate"), 1, 1, PERCENTAGE, true, false};
+    Protocol.HoldingRegisters[P3000_BDC_DISCHARGE_STOPSOC] = sGrowattModbusReg_t{
+        3037, 0, SIZE_16BIT, F("BDCDischargeStopSOC"), 1, 1, PERCENTAGE, true, false};
+    Protocol.HoldingRegisters[P3000_BDC_CHARGE_P_RATE] = sGrowattModbusReg_t{
+        3047, 0, SIZE_16BIT, F("BDCChargePowerRate"), 1, 1, PERCENTAGE, true, false};
+    Protocol.HoldingRegisters[P3000_BDC_CHARGE_STOPSOC] = sGrowattModbusReg_t{
+        3048, 0, SIZE_16BIT, F("BDCChargeStopSOC"), 1, 1, PERCENTAGE, true, false};
+    Protocol.HoldingRegisters[P3000_BDC_CHARGE_AC_ENABLED] = sGrowattModbusReg_t{
+        3049, 0, SIZE_16BIT, F("BDCChargeACEnabled"), 1, 1, NONE, true, false};
+    // FRAGMENT 2: END
 
-    Protocol.HoldingReadFragments[Protocol.HoldingRegisterCount++] = sGrowattReadFragment_t{3, 1};
+    // FRAGMENT 3: BEGIN
+    Protocol.HoldingRegisters[P3000_BDC_LOADFIRST_STOPSOC_ENABLED] = sGrowattModbusReg_t{
+        3082, 0, SIZE_16BIT, F("BDCLoadFirstStopSOCEnabled"), 1, 1, NONE, true, false};
+    // FRAGMENT 3: END
+
+    Protocol.HoldingRegisterCount = P3000_HOLING_REGISTER_COUNT;
+
+    Protocol.HoldingReadFragments[Protocol.HoldingFragmentCount++] = sGrowattReadFragment_t{3, 1};
+    Protocol.HoldingReadFragments[Protocol.HoldingFragmentCount++] = sGrowattReadFragment_t{3036, 14};
+    Protocol.HoldingReadFragments[Protocol.HoldingFragmentCount++] = sGrowattReadFragment_t{3082, 1};
+
     // COMMANDS
     
     inverter.RegisterCommand("datetime/get", getDateTime);
@@ -326,6 +398,9 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     inverter.RegisterCommand("power/get/activerate", getPowerActiveRate);
     inverter.RegisterCommand("power/set/activerate", setPowerActiveRate);
 
+    inverter.RegisterCommand("bdc/set/dischargestopsoc", setBDCDischargeStopSOC);
+    inverter.RegisterCommand("bdc/set/dischargepowerrate", setBDCDischargePowerRate);
+      
     Log.print(F("init_growattTLXH: number of input registers "));
     Log.print(Protocol.InputRegisterCount);
     Log.print(F(" number of holding registers "));
