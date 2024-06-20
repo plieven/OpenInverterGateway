@@ -193,7 +193,10 @@ bool Growatt::ReadInputRegisters() {
           }
         }
       }
+      delay(1);
     } else {
+        Log.print("ReadInputRegisters failed in fragment ");
+        Log.println(i);
 #ifdef DEBUG_MODBUS_OUTPUT
       Log.println(F("failed"));
 #endif
@@ -243,7 +246,10 @@ bool Growatt::ReadHoldingRegisters() {
           }
         }
       }
+      delay(1);
     } else {
+        Log.print("ReadHoldingRegisters failed in fragment ");
+        Log.println(i);
       return false;
     }
   }

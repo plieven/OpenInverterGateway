@@ -556,6 +556,10 @@ void sendUiJsonSite(void)
 
 void sendMetrics(void)
 {
+                Log.print("CreateMetrics Free Heap: ");
+    Log.println(ESP.getFreeHeap());
+    Log.print("Max Heap: ");
+    Log.println(ESP.getMaxFreeBlockSize());
     StringStream metrics;
     unsigned long now = millis();
     Inverter.CreateMetrics(metrics, WiFi.macAddress(), Config.hostname);
@@ -573,6 +577,10 @@ void sendMetrics(void)
         client.write(buffer, len);
     }
         //bufferedWifiClient.write(metrics.read());
+                    Log.print("Free Heap: ");
+    Log.println(ESP.getFreeHeap());
+    Log.print("Max Heap: ");
+    Log.println(ESP.getMaxFreeBlockSize());
     Log.print(millis() - now);
     Log.println(" ms took sendMetrics");
 }
