@@ -61,7 +61,7 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     Protocol.InputRegisters[P3000_INVERTER_RUNSTATE] = sGrowattModbusReg_t{
         3000, 0, SIZE_16BIT, F("InverterRunState"), 1, 1, NONE, false, false};
     Protocol.InputRegisters[P3000_PPV] = sGrowattModbusReg_t{
-        3001, 0, SIZE_32BIT, F("PVTotalPower"), 0.1, 0.1, POWER_W, true, true};
+        3001, 0, SIZE_32BIT, F("PVTotalPower"), 0.1, 0.1, POWER_W, false, false};
     Protocol.InputRegisters[P3000_VPV1] =
     sGrowattModbusReg_t{3003,       0,     SIZE_16BIT, F("PV1Voltage"), 0.1, 0.1,
         VOLTAGE, false, false};
@@ -70,7 +70,7 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         CURRENT, false, false};
     Protocol.InputRegisters[P3000_PPV1] = sGrowattModbusReg_t{
         3005,       0,     SIZE_32BIT, F("PV1Power"), 0.1, 0.1,
-        POWER_W, false, false};
+        POWER_W, true, true};
     Protocol.InputRegisters[P3000_VPV2] =
     sGrowattModbusReg_t{3007,       0,     SIZE_16BIT, F("PV2Voltage"), 0.1, 0.1,
         VOLTAGE, false, false};
@@ -79,7 +79,7 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         CURRENT, false, false};
     Protocol.InputRegisters[P3000_PPV2] = sGrowattModbusReg_t{
         3009,       0,     SIZE_32BIT, F("PV2Power"), 0.1, 0.1,
-        POWER_W, false, false};
+        POWER_W, true, true};
     Protocol.InputRegisters[P3000_VPV3] =
     sGrowattModbusReg_t{3011,       0,     SIZE_16BIT, F("PV3Voltage"), 0.1, 0.1,
         VOLTAGE, false, false};
@@ -379,16 +379,10 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         3049, 0, SIZE_16BIT, F("BDCChargeACEnabled"), 1, 1, NONE, true, false};
     // FRAGMENT 2: END
 
-    // FRAGMENT 3: BEGIN
-    Protocol.HoldingRegisters[P3000_BDC_LOADFIRST_STOPSOC_ENABLED] = sGrowattModbusReg_t{
-        3082, 0, SIZE_16BIT, F("BDCLoadFirstStopSOCEnabled"), 1, 1, NONE, true, false};
-    // FRAGMENT 3: END
-
     Protocol.HoldingRegisterCount = P3000_HOLING_REGISTER_COUNT;
 
     Protocol.HoldingReadFragments[Protocol.HoldingFragmentCount++] = sGrowattReadFragment_t{3, 1};
     Protocol.HoldingReadFragments[Protocol.HoldingFragmentCount++] = sGrowattReadFragment_t{3036, 14};
-    Protocol.HoldingReadFragments[Protocol.HoldingFragmentCount++] = sGrowattReadFragment_t{3082, 1};
 
     // COMMANDS
     
