@@ -31,6 +31,7 @@ ModbusMaster Modbus;
 Growatt::Growatt() {
   _eDevice = Undef_stick;
   _PacketCnt = 0;
+  _PacketFailCnt = 0;
 
   handlers = std::map<String, CommandHandlerFunc>();
 
@@ -265,6 +266,11 @@ bool Growatt::ReadData() {
 
   _PacketCnt++;
   _GotData = ReadInputRegisters() && ReadHoldingRegisters();
+    _PacketFailCnt += !_GotData;
+    Log.print("ReadData cnt ");
+    Log.print(_PacketCnt);
+    Log.print(" of which failed ");
+    Log.println(_PacketFailCnt);
   return _GotData;
 }
 
