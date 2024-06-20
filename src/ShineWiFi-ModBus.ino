@@ -556,26 +556,26 @@ void sendUiJsonSite(void)
 
 void sendMetrics(void)
 {
+    static unsigned maxMetricsSize = 0;
+    Log.print("last metrics size ");
+    Log.println(maxMetricsSize);
                 Log.print("CreateMetrics Free Heap: ");
     Log.println(ESP.getFreeHeap());
     Log.print("Max Heap: ");
     Log.println(ESP.getMaxFreeBlockSize());
-    StringStream metrics;
+    String metrics;
+    if (maxMetricsSize) {
+        metrics.reserve(maxMetricsSize);
+    }
     unsigned long now = millis();
     Inverter.CreateMetrics(metrics, WiFi.macAddress(), Config.hostname);
     Log.print(millis() - now);
     Log.println(" ms took Inverter.CreateMetrics");
-    httpServer.setContentLength(metrics.available());
+    //httpServer.setContentLength(metrics.available());
     Log.print(millis() - now);
     Log.println(" ms took metrics.available()");
-    httpServer.send(200, "text/plain", "");
-    WiFiClient client = httpServer.client();
-    //WriteBufferingStream bufferedWifiClient{client, BUFFER_SIZE};
-    char buffer[BUFFER_SIZE];
-    while (metrics.available()) {
-        int len = metrics.readBytes(buffer, BUFFER_SIZE);
-        client.write(buffer, len);
-    }
+    httpServer.send(200, "text/plain", metrics);
+   
         //bufferedWifiClient.write(metrics.read());
                     Log.print("Free Heap: ");
     Log.println(ESP.getFreeHeap());
@@ -583,6 +583,7 @@ void sendMetrics(void)
     Log.println(ESP.getMaxFreeBlockSize());
     Log.print(millis() - now);
     Log.println(" ms took sendMetrics");
+    maxMetricsSize = max(maxMetricsSize, metrics.length());
 }
 
 #if MQTT_SUPPORTED == 1

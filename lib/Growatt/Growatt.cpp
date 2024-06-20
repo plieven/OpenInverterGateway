@@ -646,19 +646,16 @@ void Growatt::camelCaseToSnakeCase(const String& input, char* output) {
   output[outputIndex] = '\0';
 }
 
-void Growatt::metricsAddValue(const String& name, double value,
-                              StringStream& metrics, const String& labels) {
+void inline Growatt::metricsAddValue(const String& name, double value,
+                              String& metrics, const String& labels) {
   char nameSnakeCase[name.length() + 10];
   camelCaseToSnakeCase(name, nameSnakeCase);
+  char ret[128];
+    snprintf(ret, sizeof(ret), "growatt_%s{%s} %g\n", nameSnakeCase, labels.c_str(), value);
+    metrics += ret;
+   }
 
-  metrics.print("growatt_");
-  metrics.print(nameSnakeCase);
-  metrics.print("{");
-  metrics.print(labels);
-  metrics.printf("} %g\n", value);
-}
-
-void Growatt::CreateMetrics(StringStream& metrics, const String& MacAddress,
+void Growatt::CreateMetrics(String& metrics, const String& MacAddress,
                             const String& Hostname) {
   String labels;
   if (Hostname == DEFAULT_HOSTNAME) {
