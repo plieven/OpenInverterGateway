@@ -656,9 +656,11 @@ void inline Growatt::metricsAddValue(const String& name, double value,
                               String& metrics, const String& labels) {
   char nameSnakeCase[name.length() + 10];
   camelCaseToSnakeCase(name, nameSnakeCase);
-  char ret[128];
-    snprintf(ret, sizeof(ret), "growatt_%s{%s} %g\n", nameSnakeCase, labels.c_str(), value);
-    metrics += ret;
+    String svalue = String(value);
+    while (svalue.charAt(svalue.length() - 1) == '0' || svalue.charAt(svalue.length() - 1) == '.') {
+        svalue.remove(svalue.length() - 1);
+    }
+    metrics += "growatt_" + String(nameSnakeCase) + "{" + labels + "} " + svalue + "\n";
    }
 
 void Growatt::CreateMetrics(String& metrics, const String& MacAddress,
