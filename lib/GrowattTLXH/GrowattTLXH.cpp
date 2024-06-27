@@ -103,7 +103,7 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         POWER_W, false, false};
     Protocol.InputRegisters[P3000_QAC] = sGrowattModbusReg_t{
         3021,      0,    SIZE_32BIT_S, F("ReactivePower"), 0.1, 0.1,
-        POWER_W, true, true};
+        POWER_REACTIVE, true, true};
     Protocol.InputRegisters[P3000_PAC] = sGrowattModbusReg_t{
         3023,      0,    SIZE_32BIT_S, F("OutputPower"), 0.1, 0.1,
         POWER_W, true, true};

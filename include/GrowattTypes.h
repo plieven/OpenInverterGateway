@@ -56,6 +56,7 @@ typedef enum {
   VA,
   CURRENT_M,
   RESISTANCE_K,
+  POWER_REACTIVE,
 } RegisterUnit_t;
 
 typedef enum {

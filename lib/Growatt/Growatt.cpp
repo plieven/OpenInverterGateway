@@ -522,7 +522,7 @@ void Growatt::CreateJson(JsonDocument& doc, const String& MacAddress, const Stri
 
 void Growatt::CreateUIJson(JsonDocument& doc, const String& Hostname) {
 #if SIMULATE_INVERTER != 1
-  const char* unitStr[] = {"", "W", "kWh", "V", "A", "s", "%", "Hz", "°C", "VA", "mA", "kOhm"};
+  const char* unitStr[] = {"", "W", "kWh", "V", "A", "s", "%", "Hz", "°C", "VA", "mA", "kOhm", "var"};
   const char* statusStr[] = {"(Waiting)", "(Normal Operation)", "", "(Error)"};
   const int statusStrLength = sizeof(statusStr) / sizeof(char*);
   const char* priorityStr[] = {"(Load First)", "(Battery First)", "(Grid First)"};
