@@ -112,6 +112,8 @@ std::tuple<bool, String> setBDCACChargeEnabled(const JsonDocument& req,
   return std::make_tuple(true, "Successfully updated BDCACChargeEnabled");
 }
 
+//TODO: add setters and getters for timeslots
+
 void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     // definition of input registers
     Protocol.InputRegisterCount = P3000_INPUT_REGISTER_COUNT;
@@ -165,7 +167,7 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         POWER_W, false, false};
     Protocol.InputRegisters[P3000_QAC] = sGrowattModbusReg_t{
         3021,      0,    SIZE_32BIT_S, F("ReactivePower"), 0.1, 0.1,
-        POWER_REACTIVE, true, true};
+        POWER_REACTIVE, true, false};
     Protocol.InputRegisters[P3000_PAC] = sGrowattModbusReg_t{
         3023,      0,    SIZE_32BIT_S, F("OutputPower"), 0.1, 0.1,
         POWER_W, true, true};
@@ -397,7 +399,7 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
         TEMPERATURE, true, false};
     Protocol.InputRegisters[P3000_BDC_TEMPB] = sGrowattModbusReg_t{
         3177,          0,     SIZE_16BIT, F("BDCTemperatureB"), 0.1, 0.1,
-        TEMPERATURE, false, false};
+        TEMPERATURE, true, false};
       Protocol.InputRegisters[P3000_BDC_PDISCHR] = sGrowattModbusReg_t{
           3178,    0,    SIZE_32BIT, F("BDCDischargePower"), 0.1, 0.1,
           POWER_W, true, true};
