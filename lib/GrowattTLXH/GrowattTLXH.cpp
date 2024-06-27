@@ -6,28 +6,6 @@
 #include "GrowattTLXH.h"
 #include <TLog.h>
 
-std::tuple<bool, String> setBDCDischargeStopSOC(const JsonDocument& req,
-                                            JsonDocument& res,
-                                            Growatt& inverter) {
-  if (!req.containsKey("value")) {
-    return std::make_tuple(false, "'value' field is required");
-  }
-
-  uint16_t value = req["value"].as<uint16_t>();
-
-  if (!((value >= 0 && value <= 100))) {
-    return std::make_tuple(false, "'value' field not in range");
-  }
-
-#if SIMULATE_INVERTER != 1
-  if (!inverter.WriteHoldingReg(3037, value)) {
-    return std::make_tuple(false, "Failed to write active rate");
-  }
-#endif
-
-  return std::make_tuple(true, "Successfully updated BDCDischargeStopSOC");
-};
-
 std::tuple<bool, String> setBDCDischargePowerRate(const JsonDocument& req,
                                             JsonDocument& res,
                                             Growatt& inverter) {
@@ -43,12 +21,96 @@ std::tuple<bool, String> setBDCDischargePowerRate(const JsonDocument& req,
 
 #if SIMULATE_INVERTER != 1
   if (!inverter.WriteHoldingReg(3036, value)) {
-    return std::make_tuple(false, "Failed to write active rate");
+    return std::make_tuple(false, "Failed to write BDCDischargePowerRate");
   }
 #endif
 
   return std::make_tuple(true, "Successfully updated BDCDischargePowerRate");
 };
+
+std::tuple<bool, String> setBDCDischargeStopSOC(const JsonDocument& req,
+                                            JsonDocument& res,
+                                            Growatt& inverter) {
+  if (!req.containsKey("value")) {
+    return std::make_tuple(false, "'value' field is required");
+  }
+
+  uint16_t value = req["value"].as<uint16_t>();
+
+  if (!((value >= 0 && value <= 100))) {
+    return std::make_tuple(false, "'value' field not in range");
+  }
+
+#if SIMULATE_INVERTER != 1
+  if (!inverter.WriteHoldingReg(3037, value)) {
+    return std::make_tuple(false, "Failed to write BDCDischargeStopSOC");
+  }
+#endif
+
+  return std::make_tuple(true, "Successfully updated BDCDischargeStopSOC");
+};
+
+std::tuple<bool, String> setBDCChargePowerRate(const JsonDocument& req,
+                                            JsonDocument& res,
+                                            Growatt& inverter) {
+  if (!req.containsKey("value")) {
+    return std::make_tuple(false, "'value' field is required");
+  }
+
+  uint16_t value = req["value"].as<uint16_t>();
+
+  if (!((value >= 0 && value <= 100))) {
+    return std::make_tuple(false, "'value' field not in range");
+  }
+
+#if SIMULATE_INVERTER != 1
+  if (!inverter.WriteHoldingReg(3047, value)) {
+    return std::make_tuple(false, "Failed to write BDCChargePowerRate");
+  }
+#endif
+
+  return std::make_tuple(true, "Successfully updated BDCChargePowerRate");
+};
+
+std::tuple<bool, String> setBDCChargeStopSOC(const JsonDocument& req,
+                                            JsonDocument& res,
+                                            Growatt& inverter) {
+  if (!req.containsKey("value")) {
+    return std::make_tuple(false, "'value' field is required");
+  }
+
+  uint16_t value = req["value"].as<uint16_t>();
+
+  if (!((value >= 0 && value <= 100))) {
+    return std::make_tuple(false, "'value' field not in range");
+  }
+
+#if SIMULATE_INVERTER != 1
+  if (!inverter.WriteHoldingReg(3048, value)) {
+    return std::make_tuple(false, "Failed to write BDCChargeStopSOC");
+  }
+#endif
+
+  return std::make_tuple(true, "Successfully updated BDCChargeStopSOC");
+};
+
+std::tuple<bool, String> setBDCACChargeEnabled(const JsonDocument& req,
+                                                        JsonDocument& res,
+                                                        Growatt& inverter) {
+  if (!req.containsKey("value")) {
+    return std::make_tuple(false, "'value' field is required");
+  }
+
+#if SIMULATE_INVERTER != 1
+  uint16_t value = req["value"].as<uint16_t>();
+  if (!inverter.WriteHoldingReg(3049, value)) {
+    return std::make_tuple(false,
+                           "Failed to write AC charge enabled");
+  }
+#endif
+
+  return std::make_tuple(true, "Successfully updated BDCACChargeEnabled");
+}
 
 void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
     // definition of input registers
@@ -361,11 +423,9 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
 
     // FRAGMENT 2: BEGIN
     // The BDCDischargePowerRate seems to apply to grid first AND load first mode.
-    // The BDCDischargeStopSOC applies to grid first mode AND also to load first mode
-    // XXX: if BDCLoadFristStopSOCEnabled is enabled.
+    // The BDCDischargeStopSOC applies to grid first mode only
     // The BDCChargePowerRate seems to apply to battery first AND load first mode.
     // The BDCChargeStopSOC applies to battery first mode AND also to load first mode
-    // XXX: if BDCLoadFristStopSOCEnabled is enabled.
     // XXX: If BDCChargeACEnabled is enabled the battery is charged up to ... in xxx modes.
     Protocol.HoldingRegisters[P3000_BDC_DISCHARGE_P_RATE] = sGrowattModbusReg_t{
         3036, 0, SIZE_16BIT, F("BDCDischargePowerRate"), 1, 1, PERCENTAGE, true, false};
@@ -394,7 +454,12 @@ void init_growattTLXH(sProtocolDefinition_t& Protocol, Growatt& inverter) {
 
     inverter.RegisterCommand("bdc/set/dischargestopsoc", setBDCDischargeStopSOC);
     inverter.RegisterCommand("bdc/set/dischargepowerrate", setBDCDischargePowerRate);
-      
+
+    inverter.RegisterCommand("bdc/set/chargestopsoc", setBDCChargeStopSOC);
+    inverter.RegisterCommand("bdc/set/chargepowerrate", setBDCChargePowerRate);
+
+    inverter.RegisterCommand("bdc/set/acchargeenabled", setBDCACChargeEnabled);
+
     Log.print(F("init_growattTLXH: number of input registers "));
     Log.print(Protocol.InputRegisterCount);
     Log.print(F(" number of holding registers "));
