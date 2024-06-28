@@ -774,30 +774,12 @@ void handlePostData()
     }
 }
 
-// -------------------------------------------------------
-// Main loop
-// -------------------------------------------------------
-unsigned long ButtonTimer = 0;
-unsigned long LEDTimer = 0;
-unsigned long RefreshTimer = 0;
-unsigned long WifiRetryTimer = 0;
 #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
-unsigned long nextNTPSync = 60000; // allow for Wifi to connect and first SNTP sync to happen
-#endif
-
 extern "C" uint8_t sntp_getreachability(uint8_t);
 
-void loop()
-{
-    #if ENABLE_DOUBLE_RESET
-        drd->loop();
-    #endif
-
-    Log.loop();
+void handleNTPSync() {
+    static unsigned long nextNTPSync = 60000; // allow for Wifi to connect and first SNTP sync to happen
     unsigned long now = millis();
-    char readoutSucceeded;
-
-    #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
     if (now > nextNTPSync) {
         int reachable = sntp_getreachability(0);
         Log.print(F("NTP server: "));
@@ -818,7 +800,26 @@ void loop()
         }
         nextNTPSync = now + 3600000;
     }
+}
+#endif
+
+// -------------------------------------------------------
+// Main loop
+// -------------------------------------------------------
+unsigned long ButtonTimer = 0;
+unsigned long LEDTimer = 0;
+unsigned long RefreshTimer = 0;
+unsigned long WifiRetryTimer = 0;
+
+void loop()
+{
+    #if ENABLE_DOUBLE_RESET
+        drd->loop();
     #endif
+
+    Log.loop();
+    unsigned long now = millis();
+    char readoutSucceeded;
 
 #ifdef AP_BUTTON_PRESSED
     if ((now - ButtonTimer) > BUTTON_TIMER)
@@ -948,6 +949,10 @@ void loop()
                 }
             }
             u8RetryCounter = NUM_OF_RETRIES;
+            
+            #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
+                handleNTPSync();
+            #endif
         }
 
         #if MQTT_SUPPORTED == 1
