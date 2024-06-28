@@ -956,7 +956,9 @@ void loop()
         }
 
         #if MQTT_SUPPORTED == 1
-        shineMqtt.updateMqttLed();
+            if (shineMqtt.mqttEnabled()) {
+                shineMqtt.updateMqttLed();
+            }
         #endif
 
         #if PINGER_SUPPORTED == 1
