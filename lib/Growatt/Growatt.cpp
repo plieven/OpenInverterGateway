@@ -671,38 +671,43 @@ void inline Growatt::metricsAddValue(const String& name, double value, uint16_t 
 
 void Growatt::CreateMetrics(String& metrics, const String& MacAddress,
                             const String& Hostname) {
-  String labels;
-  if (Hostname == DEFAULT_HOSTNAME) {
-    labels = "mac=\"" + MacAddress + "\"";
-  } else {
-    labels = "mac=\"" + MacAddress + "\",name=\"" + Hostname + "\"";
-  }
+    String labels;
+    if (Hostname == DEFAULT_HOSTNAME) {
+        labels = "mac=\"" + MacAddress + "\"";
+    } else {
+        labels = "mac=\"" + MacAddress + "\",name=\"" + Hostname + "\"";
+    }
 #if SIMULATE_INVERTER != 1
-  for (int i = 0; i < _Protocol.InputRegisterCount; i++)
-    metricsAddValue(_Protocol.InputRegisters[i].name,
-                    getRegValue(&_Protocol.InputRegisters[i]), _Protocol.InputRegisters[i].divisor, metrics, labels);
-
-  for (int i = 0; i < _Protocol.HoldingRegisterCount; i++)
-    metricsAddValue(_Protocol.HoldingRegisters[i].name,
-                    getRegValue(&_Protocol.HoldingRegisters[i]), _Protocol.HoldingRegisters[i].divisor, metrics,
-                    labels);
-
+    for (int i = 0; i < _Protocol.InputRegisterCount; i++)
+        metricsAddValue(_Protocol.InputRegisters[i].name,
+                        getRegValue(&_Protocol.InputRegisters[i]), _Protocol.InputRegisters[i].divisor, metrics, labels);
+    
+    for (int i = 0; i < _Protocol.HoldingRegisterCount; i++)
+        metricsAddValue(_Protocol.HoldingRegisters[i].name,
+                        getRegValue(&_Protocol.HoldingRegisters[i]), _Protocol.HoldingRegisters[i].divisor, metrics,
+                        labels);
+    
 #else
 #warning simulating the inverter
-  metricsAddValue("Status", 1, metrics, labels);
-  metricsAddValue("DcPower", 230, metrics, labels);
-  metricsAddValue("DcVoltage", 70.5, metrics, labels);
-  metricsAddValue("DcInputCurrent", 8.5, metrics, labels);
-  metricsAddValue("AcFreq", 50.00, metrics, labels);
-  metricsAddValue("AcVoltage", 230.0, metrics, labels);
-  metricsAddValue("AcPower", 0.00, metrics, labels);
-  metricsAddValue("EnergyToday", 0.3, metrics, labels);
-  metricsAddValue("EnergyTotal", 49.1, metrics, labels);
-  metricsAddValue("OperatingTime", 123456, metrics, labels);
-  metricsAddValue("Temperature", 21.12, metrics, labels);
-  metricsAddValue("AccumulatedEnergy", 320, metrics, labels);
+    metricsAddValue("Status", 1, metrics, labels);
+    metricsAddValue("DcPower", 230, metrics, labels);
+    metricsAddValue("DcVoltage", 70.5, metrics, labels);
+    metricsAddValue("DcInputCurrent", 8.5, metrics, labels);
+    metricsAddValue("AcFreq", 50.00, metrics, labels);
+    metricsAddValue("AcVoltage", 230.0, metrics, labels);
+    metricsAddValue("AcPower", 0.00, metrics, labels);
+    metricsAddValue("EnergyToday", 0.3, metrics, labels);
+    metricsAddValue("EnergyTotal", 49.1, metrics, labels);
+    metricsAddValue("OperatingTime", 123456, metrics, labels);
+    metricsAddValue("Temperature", 21.12, metrics, labels);
+    metricsAddValue("AccumulatedEnergy", 320, metrics, labels);
 #endif  // SIMULATE_INVERTER
-  metricsAddValue("Cnt", _PacketCnt, 1, metrics, labels);
+    metricsAddValue("Cnt", _PacketCnt, 1, metrics, labels);
+    metricsAddValue("Uptime", millis() / 1000, 1, metrics, labels);
+    metricsAddValue("WifiRSSI", WiFi.RSSI(), 1, metrics, labels);
+    metricsAddValue("FreeHeap", ESP.getFreeHeap(), 1, metrics, labels);
+    metricsAddValue("MaxFreeHeapBlock", ESP.getMaxFreeBlockSize(), 1, metrics, labels);
+    metricsAddValue("HeapFragmentation", ESP.getHeapFragmentation(), 1, metrics, labels);
 }
 
 void Growatt::RegisterCommand(const String& command,
