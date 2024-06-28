@@ -72,8 +72,6 @@ uint16_t u16PacketCnt = 0;
     WebServer httpServer(80);
 #endif
 
-WiFiManager wm;
-
 struct {
     WiFiManagerParameter* hostname = NULL;
     WiFiManagerParameter* static_ip = NULL;
@@ -167,7 +165,7 @@ void InverterReconnect(void)
 void loadConfig();
 void saveConfig();
 void saveParamCallback();
-void setupWifiManagerConfigMenu();
+void setupWifiManagerConfigMenu(WiFiManager& wm);
 
 void loadConfig()
 {
@@ -309,6 +307,8 @@ void resetWdt()
 
 void setup()
 {
+    WiFiManager wm;
+    
     Log.println("Setup()");
 
     configureLogging();
@@ -334,7 +334,7 @@ void setup()
     Log.begin();
     startWdt();
 
-    setupWifiManagerConfigMenu();
+    setupWifiManagerConfigMenu(wm);
 
     digitalWrite(LED_BL, 1);
     // Set a timeout so the ESP doesn't hang waiting to be configured, for instance after a power failure
@@ -431,7 +431,7 @@ void setup()
 }
 
 
-void setupWifiManagerConfigMenu() {
+void setupWifiManagerConfigMenu(WiFiManager& wm) {
     customWMParams.hostname = new WiFiManagerParameter("hostname", "hostname (no spaces or special chars)", Config.hostname.c_str(), 30);
     customWMParams.static_ip = new WiFiManagerParameter("staticip", "ip", Config.static_ip.c_str(), 15);
     customWMParams.static_netmask = new WiFiManagerParameter("staticnetmask", "netmask", Config.static_netmask.c_str(), 15);
@@ -461,7 +461,7 @@ void setupWifiManagerConfigMenu() {
 
     wm.setSaveParamsCallback(saveParamCallback);
 
-    setupMenu(true);
+    setupMenu(wm, true);
 }
 
 /**
@@ -469,7 +469,7 @@ void setupWifiManagerConfigMenu() {
  * 
  * @param enableCustomParams enable custom params aka. mqtt settings
  */
-void setupMenu(bool enableCustomParams){
+void setupMenu(WiFiManager& wm, bool enableCustomParams){
     Log.println(F("Setting up WiFiManager menu"));
     std::vector<const char*> menu = { "wifi","wifinoscan","update"};
     if(enableCustomParams){
@@ -844,6 +844,7 @@ void loop()
     }
 #endif
 
+/*
     if (StartedConfigAfterBoot == true)
     {
         digitalWrite(LED_BL, 1);
@@ -860,6 +861,7 @@ void loop()
         delay(3000);
         ESP.restart();
     }
+*/
 
     WiFi_Reconnect();
 
