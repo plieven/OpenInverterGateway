@@ -42,11 +42,12 @@ class Growatt {
   std::map<String, CommandHandlerFunc> handlers;
 
   eDevice_t _InitModbusCommunication();
-  double roundByResolution(const double& value, const float& resolution);
+  double roundByResolution(const double& value,
+                           const uint16_t& divisor);
   double getRegValue(sGrowattModbusReg_t* reg);
   void camelCaseToSnakeCase(const String& input, char* output);
-  void metricsAddValue(const String& name, double value, String& metrics,
-                       const String& labels);
+  void metricsAddValue(const String& name, double value, uint16_t divisor,
+                       String& metrics, const String& labels);
   std::tuple<bool, String> handleEcho(const JsonDocument& req,
                                       JsonDocument& res, Growatt& inverter);
   std::tuple<bool, String> handleCommandList(const JsonDocument& req,

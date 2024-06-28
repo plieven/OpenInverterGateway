@@ -72,7 +72,7 @@ typedef struct {
   RegisterSize_t size;
   const __FlashStringHelper* name;
   float multiplier;
-  float resolution;
+  uint16_t divisor;
   RegisterUnit_t unit;
   bool frontend;
   bool plot;
