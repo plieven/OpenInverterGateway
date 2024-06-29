@@ -32,6 +32,7 @@ Growatt::Growatt() {
   _eDevice = Undef_stick;
   _PacketCnt = 0;
   _PacketFailCnt = 0;
+  _HoldingRegistersRequireUpdate = true;
 
   handlers = std::map<String, CommandHandlerFunc>();
 
@@ -221,6 +222,10 @@ bool Growatt::ReadHoldingRegisters() {
   uint16_t registerAddress;
   uint8_t res;
 
+  if (!_HoldingRegistersRequireUpdate) {
+    return true;
+  }
+
   // read each fragment separately
   for (int i = 0; i < _Protocol.HoldingFragmentCount; i++) {
     res = Modbus.readHoldingRegisters(
@@ -254,6 +259,8 @@ bool Growatt::ReadHoldingRegisters() {
       return false;
     }
   }
+
+  _HoldingRegistersRequireUpdate = false;
   return true;
 }
 
@@ -364,6 +371,7 @@ bool Growatt::ReadHoldingRegFrag(uint16_t adr, uint8_t size, uint32_t* result) {
    * @param result pointer to the result
    * @returns true if successful
    */
+  _HoldingRegistersRequireUpdate = true;
   uint8_t res = Modbus.readHoldingRegisters(adr, size * 2);
   if (res == Modbus.ku8MBSuccess) {
     for (int i = 0; i < size; i++) {
@@ -382,6 +390,7 @@ bool Growatt::WriteHoldingReg(uint16_t adr, uint16_t value) {
  * @param value value to write to the register
  * @returns true if successful
  */
+  _HoldingRegistersRequireUpdate = true;
 #if SIMULATE_INVERTER != 1
   uint8_t res = Modbus.writeSingleRegister(adr, value);
   if (res == Modbus.ku8MBSuccess) {
