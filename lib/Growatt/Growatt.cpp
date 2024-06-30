@@ -129,6 +129,7 @@ void Growatt::begin(Stream& serial) {
     delay(1000);
     Serial.begin(115200);
     Modbus.begin(1, serial);
+    Modbus.setResponseTimeout(200);
     res = Modbus.readInputRegisters(0, 1);
     if (res == Modbus.ku8MBSuccess) {
       _eDevice = ShineWiFi_X;  // USB
@@ -195,7 +196,6 @@ bool Growatt::ReadInputRegisters(uint8_t& i) {
           }
         }
       }
-      delay(1);
     } else {
         Log.print("ReadInputRegisters failed in fragment ");
         Log.println(i);
@@ -248,7 +248,6 @@ bool Growatt::ReadHoldingRegisters(uint8_t& i) {
           }
         }
       }
-      delay(1);
     } else {
         Log.print("ReadHoldingRegisters failed in fragment ");
         Log.println(i);
