@@ -903,53 +903,35 @@ void loop()
     {
         if ((WiFi.status() == WL_CONNECTED) && (Inverter.GetWiFiStickType()))
         {
-            readoutSucceeded = 0;
-            while ((u8RetryCounter) && !(readoutSucceeded))
+            unsigned long now = millis();
+            #if SIMULATE_INVERTER == 1
+            if (1) // do it always
+            #else
+            if (Inverter.ReadData(NUM_OF_RETRIES)) // get new data from inverter
+            #endif
             {
-                #if SIMULATE_INVERTER == 1
-                if (1) // do it always
-                #else
-                unsigned long now = millis();
-                if (Inverter.ReadData()) // get new data from inverter
+                Log.print(F("ReadData() successful ("));
+                Log.print(millis() - now);
+                Log.println(") ms");
+                boolean mqttSuccess = false;
+
+                #if MQTT_SUPPORTED == 1
+                if (shineMqtt.mqttEnabled()) {
+                    mqttSuccess = sendMqttJson();
+                }
                 #endif
-                {
-                    Log.print(F("ReadData() successful ("));
-                    Log.print(millis() - now);
-                    Log.println(") ms");
-                    u16PacketCnt++;
-                    u8RetryCounter = NUM_OF_RETRIES;
-                    boolean mqttSuccess = false;
+                handleWdtReset(mqttSuccess);
 
-                    #if MQTT_SUPPORTED == 1
-                    if (shineMqtt.mqttEnabled()) {
-                        mqttSuccess = sendMqttJson();
-                    }
-                    #endif
-                    handleWdtReset(mqttSuccess);
-
-                    digitalWrite(LED_RT, 0); // clear red led if everything is ok
-                    // leave while-loop
-                    readoutSucceeded = 1;
-                }
-                else
-                {
-                    Log.println(F("ReadData() NOT successful"));
-                    if (u8RetryCounter)
-                    {
-                        u8RetryCounter--;
-                    }
-                    else
-                    {
-                        Log.println(F("Retry counter"));
-                        #if MQTT_SUPPORTED == 1
-                            shineMqtt.mqttPublish(String(F("{\"InverterStatus\": -1 }")));
-                        #endif
-                        digitalWrite(LED_RT, 1); // set red led in case of error
-                    }
-                }
+                digitalWrite(LED_RT, 0); // clear red led if everything is ok
+            } else {
+                Log.println(F("ReadData() NOT successful"));
+                Log.println(F("Retry counter"));
+                #if MQTT_SUPPORTED == 1
+                    shineMqtt.mqttPublish(String(F("{\"InverterStatus\": -1 }")));
+                #endif
+                digitalWrite(LED_RT, 1); // set red led in case of error
             }
-            u8RetryCounter = NUM_OF_RETRIES;
-            
+
             #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
                 handleNTPSync();
             #endif

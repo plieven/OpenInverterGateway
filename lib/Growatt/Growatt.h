@@ -16,9 +16,9 @@ class Growatt {
   void HandleCommand(const String& command, const byte* payload,
                      const unsigned int length, JsonDocument& req,
                      JsonDocument& res);
-  bool ReadInputRegisters();
-  bool ReadHoldingRegisters();
-  bool ReadData();
+  bool ReadInputRegisters(uint8_t& offs);
+  bool ReadHoldingRegisters(uint8_t& offs);
+  bool ReadData(uint8_t maxRetries);
   eDevice_t GetWiFiStickType();
   sGrowattModbusReg_t GetInputRegister(uint16_t reg);
   sGrowattModbusReg_t GetHoldingRegister(uint16_t reg);

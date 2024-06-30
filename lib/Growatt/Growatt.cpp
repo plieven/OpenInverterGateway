@@ -147,7 +147,7 @@ eDevice_t Growatt::GetWiFiStickType() {
   return _eDevice;
 }
 
-bool Growatt::ReadInputRegisters() {
+bool Growatt::ReadInputRegisters(uint8_t& i) {
   /**
    * @brief Read the input registers from the inverter
    * @returns true if data was read successfully, false otherwise
@@ -157,7 +157,7 @@ bool Growatt::ReadInputRegisters() {
   int j = 0;
 
   // read each fragment separately
-  for (int i = 0; i < _Protocol.InputFragmentCount; i++) {
+  for (; i < _Protocol.InputFragmentCount; i++) {
 #ifdef DEBUG_MODBUS_OUTPUT
     Log.printf("Modbus: read Segment from 0x%02X with len: %d ...",
                _Protocol.InputReadFragments[i].StartAddress,
@@ -214,7 +214,7 @@ bool Growatt::ReadInputRegisters() {
     return true;
 }
 
-bool Growatt::ReadHoldingRegisters() {
+bool Growatt::ReadHoldingRegisters(uint8_t& i) {
   /**
    * @brief Read the holding registers from the inverter
    * @returns true if data was read successfully, false otherwise
@@ -222,12 +222,8 @@ bool Growatt::ReadHoldingRegisters() {
   uint16_t registerAddress;
   uint8_t res;
 
-  if (!_HoldingRegistersRequireUpdate) {
-    return true;
-  }
-
   // read each fragment separately
-  for (int i = 0; i < _Protocol.HoldingFragmentCount; i++) {
+  for (; i < _Protocol.HoldingFragmentCount; i++) {
     res = Modbus.readHoldingRegisters(
         _Protocol.HoldingReadFragments[i].StartAddress,
         _Protocol.HoldingReadFragments[i].FragmentSize);
@@ -264,21 +260,43 @@ bool Growatt::ReadHoldingRegisters() {
   return true;
 }
 
-bool Growatt::ReadData() {
+bool Growatt::ReadData(uint8_t maxRetries) {
   /**
    * @brief Reads the data from the inverter and updates the internal data
    * structures
    * @returns true if data was read successfully, false otherwise
    */
-
-  _PacketCnt++;
-  _GotData = ReadInputRegisters() && ReadHoldingRegisters();
-    _PacketFailCnt += !_GotData;
+    uint8_t inputFragOffs = 0;
+    uint8_t holdingFragOffs = 0;
+    bool res;
+    while (inputFragOffs < _Protocol.InputFragmentCount) {
+        _PacketCnt++;
+        res = ReadInputRegisters(inputFragOffs);
+        if (!res) {
+            _PacketFailCnt++;
+            if (!maxRetries) {
+                _GotData = false;
+                return false;
+            }
+            maxRetries--;
+        }
+    }
+    while (_HoldingRegistersRequireUpdate && holdingFragOffs < _Protocol.HoldingFragmentCount) {
+        _PacketCnt++;
+        res = ReadHoldingRegisters(holdingFragOffs);
+        if (!res) {
+            _PacketFailCnt++;
+            if (!maxRetries) {
+                return false;
+            }
+            maxRetries--;
+        }
+    }
     Log.print("ReadData cnt ");
     Log.print(_PacketCnt);
     Log.print(" of which failed ");
     Log.println(_PacketFailCnt);
-  return _GotData;
+    return true;
 }
 
 sGrowattModbusReg_t Growatt::GetInputRegister(uint16_t reg) {
@@ -288,7 +306,7 @@ sGrowattModbusReg_t Growatt::GetInputRegister(uint16_t reg) {
    * @returns the register value
    */
   if (_GotData == false) {
-    ReadData();
+    ReadData(1);
   }
   return _Protocol.InputRegisters[reg];
 }
@@ -300,7 +318,7 @@ sGrowattModbusReg_t Growatt::GetHoldingRegister(uint16_t reg) {
    * @returns the register value
    */
   if (_GotData == false) {
-    ReadData();
+    ReadData(1);
   }
   return _Protocol.HoldingRegisters[reg];
 }
