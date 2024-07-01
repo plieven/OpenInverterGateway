@@ -59,7 +59,7 @@ byte btnPressed = 0;
 #endif
 
 #define NUM_OF_RETRIES 5
-char u8RetryCounter = NUM_OF_RETRIES;
+bool readoutSucceeded = false;
 
 uint16_t u16PacketCnt = 0;
 #if PINGER_SUPPORTED == 1
@@ -493,6 +493,10 @@ void sendJson(JsonDocument& doc)
 
 void sendJsonSite(void)
 {
+    if (!readoutSucceeded) {
+        httpServer.send(503, F("text/plain"), F("Service Unavailable"));
+        return;
+    }
         unsigned long now = millis();
            Log.print("Free Heap: ");
     Log.println(ESP.getFreeHeap());
@@ -514,7 +518,10 @@ void sendJsonSite(void)
 
 bool sendSingleJsonValue(void)
 {
-    
+    if (!readoutSucceeded) {
+        httpServer.send(503, F("text/plain"), F("Service Unavailable"));
+        return true;
+    }
     const String& key = httpServer.uri().substring(7);
         unsigned long now = millis();
             Log.print("Free Heap: ");
@@ -554,6 +561,10 @@ void sendUiJsonSite(void)
 
 void sendMetrics(void)
 {
+    if (!readoutSucceeded) {
+        httpServer.send(503, F("text/plain"), F("Service Unavailable"));
+        return;
+    }
     static unsigned maxMetricsSize = 0;
     Log.print("last metrics size ");
     Log.println(maxMetricsSize);
@@ -817,7 +828,6 @@ void loop()
 
     Log.loop();
     unsigned long now = millis();
-    char readoutSucceeded;
 
 #ifdef AP_BUTTON_PRESSED
     if ((now - ButtonTimer) > BUTTON_TIMER)
@@ -923,6 +933,7 @@ void loop()
                 handleWdtReset(mqttSuccess);
 
                 digitalWrite(LED_RT, 0); // clear red led if everything is ok
+                readoutSucceeded = true;
             } else {
                 Log.println(F("ReadData() NOT successful"));
                 Log.println(F("Retry counter"));
@@ -930,6 +941,7 @@ void loop()
                     shineMqtt.mqttPublish(String(F("{\"InverterStatus\": -1 }")));
                 #endif
                 digitalWrite(LED_RT, 1); // set red led in case of error
+                readoutSucceeded = false;
             }
 
             #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
