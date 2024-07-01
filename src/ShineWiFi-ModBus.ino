@@ -100,6 +100,7 @@ static const struct {
     const char* mqtt_user = "/mqttu";
     const char* mqtt_pwd = "/mqttw";
 #endif
+    const char* force_ap = "/forceap";
 } ConfigFiles;
 
 struct {
@@ -111,6 +112,7 @@ struct {
 #if MQTT_SUPPORTED == 1
   MqttConfig mqtt;
 #endif
+  bool force_ap;
 } Config;
 
 #define CONFIG_PORTAL_MAX_TIME_SECONDS 300
@@ -181,6 +183,7 @@ void loadConfig()
     Config.mqtt.user = prefs.getString(ConfigFiles.mqtt_user, "");
     Config.mqtt.pwd = prefs.getString(ConfigFiles.mqtt_pwd, "");
 #endif
+    Config.force_ap = prefs.getBool(ConfigFiles.force_ap, false);
 }
 
 void saveConfig()
@@ -197,6 +200,7 @@ void saveConfig()
     prefs.putString(ConfigFiles.mqtt_user, Config.mqtt.user);
     prefs.putString(ConfigFiles.mqtt_pwd, Config.mqtt.pwd);
 #endif
+    prefs.putBool(ConfigFiles.force_ap, false);
 }
 
 void saveParamCallback()
@@ -333,6 +337,7 @@ void setup()
 
     loadConfig();
     setupWifiHost();
+       
     Log.setIdentifier(Config.hostname);
 
     Log.begin();
@@ -368,6 +373,16 @@ void setup()
             wm.setSTAStaticIPConfig(ip, gateway, netmask);
         }
     }
+
+    if (Config.force_ap) {
+        prefs.putBool(ConfigFiles.force_ap, false);
+        wm.startConfigPortal("GrowattConfig", APPassword);
+        Log.println(F("GrowattConfig finished"));
+        digitalWrite(LED_BL, 0);
+        delay(3000);
+        ESP.restart();
+    }
+
     // Automatically connect using saved credentials,
     // if connection fails, it starts an access point with the specified name ("GrowattConfig")
     bool res = wm.autoConnect("GrowattConfig", APPassword); // password protected wificonfig ap
@@ -858,24 +873,12 @@ void loop()
     }
 #endif
 
-/*
     if (StartedConfigAfterBoot == true)
     {
-        digitalWrite(LED_BL, 1);
-        httpServer.stop();
-        Log.println(F("Config after boot started"));
-        #ifndef KEEP_AP_CONFIG_CONNECTION
-        ShineWifiDisconnect();
-        #endif
-        
-        wm.setConfigPortalTimeout(CONFIG_PORTAL_MAX_TIME_SECONDS);
-        wm.startConfigPortal("GrowattConfig", APPassword);
-        Log.println(F("GrowattConfig finished"));
-        digitalWrite(LED_BL, 0);
+        prefs.putBool(ConfigFiles.force_ap, true);
         delay(3000);
         ESP.restart();
     }
-*/
 
     WiFi_Reconnect();
 
