@@ -307,9 +307,13 @@ void resetWdt()
 
 void setup()
 {
-    WiFiManager wm;
+            WiFiManager wm;
     
     Log.println("Setup()");
+    
+    digitalWrite(LED_BL, 0);
+    digitalWrite(LED_RT, 0);
+    digitalWrite(LED_GN, 0);
 
     configureLogging();
     setupGPIO();
