@@ -272,7 +272,9 @@ void setupWifiHost()
 {
     WiFi.hostname(Config.hostname);
     WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-    MDNS.begin(Config.hostname);
+    if (!MDNS.begin(Config.hostname)) {
+        Log.println("MDNS.begin failed!");
+    }
     Log.print(F("setupWifiHost: hostname "));
     Log.println(Config.hostname);
 }
@@ -350,7 +352,20 @@ void setup()
     
     int connect_timeout_seconds = 15;
     wm.setConfigPortalTimeout(CONFIG_PORTAL_MAX_TIME_SECONDS);
-    wm.setConnectTimeout(connect_timeout_seconds);
+
+    #ifdef AP_BUTTON_PRESSED
+        if (AP_BUTTON_PRESSED) {
+            Config.force_ap = true;
+        }
+    #endif
+    if (Config.force_ap) {
+        prefs.putBool(ConfigFiles.force_ap, false);
+        wm.startConfigPortal("GrowattConfig", APPassword);
+        Log.println(F("GrowattConfig finished"));
+        digitalWrite(LED_BL, 0);
+        delay(3000);
+        ESP.restart();
+    }
 
     // Set static ip
     if (!Config.static_ip.isEmpty() && !Config.static_netmask.isEmpty()) {
@@ -374,15 +389,7 @@ void setup()
         }
     }
 
-    if (Config.force_ap) {
-        prefs.putBool(ConfigFiles.force_ap, false);
-        wm.startConfigPortal("GrowattConfig", APPassword);
-        Log.println(F("GrowattConfig finished"));
-        digitalWrite(LED_BL, 0);
-        delay(3000);
-        ESP.restart();
-    }
-
+    wm.setConnectTimeout(connect_timeout_seconds);
     // Automatically connect using saved credentials,
     // if connection fails, it starts an access point with the specified name ("GrowattConfig")
     bool res = wm.autoConnect("GrowattConfig", APPassword); // password protected wificonfig ap
