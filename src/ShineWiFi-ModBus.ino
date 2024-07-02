@@ -38,6 +38,7 @@
 #endif
 
 #if OTA_SUPPORTED == 1
+    #
     #include <ArduinoOTA.h>
 #endif
 
@@ -339,7 +340,8 @@ void setup()
 
     loadConfig();
     setupWifiHost();
-       
+
+
     Log.setIdentifier(Config.hostname);
 
     Log.begin();
@@ -448,7 +450,9 @@ void setup()
 
     #if OTA_SUPPORTED == 1 && defined(OTA_PASSWORD)
     ArduinoOTA.setPassword(OTA_PASSWORD);
-    ArduinoOTA.begin();
+    ArduinoOTA.setHostname(Config.hostname.c_str());
+    ArduinoOTA.begin(false);
+    MDNS.enableArduino(8266, true);
     #endif
 
     #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
@@ -978,11 +982,12 @@ void loop()
             }
         #endif
 
-        #if OTA_SUPPORTED == 1
-        // check for OTA updates
-        ArduinoOTA.handle();
-        #endif
-
         RefreshTimer = now;
     }
+
+    #if OTA_SUPPORTED == 1
+        // check for OTA updates
+        ArduinoOTA.handle();
+    #endif
+    MDNS.update();
 }
