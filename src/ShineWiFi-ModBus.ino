@@ -273,9 +273,6 @@ void setupWifiHost()
 {
     WiFi.hostname(Config.hostname);
     WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-    if (!MDNS.begin(Config.hostname)) {
-        Log.println("MDNS.begin failed!");
-    }
     Log.print(F("setupWifiHost: hostname "));
     Log.println(Config.hostname);
 }
@@ -341,6 +338,11 @@ void setup()
     loadConfig();
     setupWifiHost();
 
+    #if OTA_SUPPORTED == 1 && defined(OTA_PASSWORD)
+        ArduinoOTA.setPassword(OTA_PASSWORD);
+        ArduinoOTA.setHostname(Config.hostname.c_str());
+        ArduinoOTA.begin();
+    #endif
 
     Log.setIdentifier(Config.hostname);
 
@@ -447,13 +449,6 @@ void setup()
     Inverter.InitProtocol();
     InverterReconnect();
     httpServer.begin();
-
-    #if OTA_SUPPORTED == 1 && defined(OTA_PASSWORD)
-    ArduinoOTA.setPassword(OTA_PASSWORD);
-    ArduinoOTA.setHostname(Config.hostname.c_str());
-    ArduinoOTA.begin(false);
-    MDNS.enableArduino(8266, true);
-    #endif
 
     #if defined(DEFAULT_NTP_SERVER) && defined(DEFAULT_TZ_INFO)
     configTime(DEFAULT_TZ_INFO, DEFAULT_NTP_SERVER);
@@ -989,5 +984,4 @@ void loop()
         // check for OTA updates
         ArduinoOTA.handle();
     #endif
-    MDNS.update();
 }
