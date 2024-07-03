@@ -478,8 +478,9 @@ bool Growatt::ReadInputReg(uint16_t adr, uint32_t* result) {
 }
 
 double Growatt::roundByResolution(const double& value,
-                                  const uint16_t& divisor) {
-  return int32_t(value * divisor + 0.5) / (double)divisor;
+                                  const float& resolution) {
+  const double res = 1 / resolution;
+  return int32_t(value * res + 0.5) / res;
 }
 
 double Growatt::getRegValue(sGrowattModbusReg_t* reg) {
@@ -487,23 +488,23 @@ double Growatt::getRegValue(sGrowattModbusReg_t* reg) {
   RegisterSize_t size = reg->size;
   const float& mult = reg->multiplier;
   const uint32_t& value = reg->value;
-  const uint16_t& divisor = reg->divisor;
+  const float& resolution = reg->resolution;
 
   switch (size) {
     case SIZE_16BIT_S:
-      result = (divisor == 1)
+      result = (mult == (int)mult)
                    ? (int16_t)value * mult
-                   : roundByResolution((int16_t)value * mult, divisor);
+                   : roundByResolution((int16_t)value * mult, resolution);
       break;
     case SIZE_32BIT_S:
-      result = (divisor == 1)
+      result = (mult == (int)mult)
                    ? (int32_t)value * mult
-                   : roundByResolution((int32_t)value * mult, divisor);
+                   : roundByResolution((int32_t)value * mult, resolution);
       break;
     default:
-      result = (divisor == 1)
+      result = (mult == (int)mult)
                    ? value * mult
-                   : roundByResolution(value * mult, divisor);
+                   : roundByResolution(value * mult, resolution);
   }
   return result;
 }
@@ -693,21 +694,11 @@ void Growatt::camelCaseToSnakeCase(const String& input, char* output) {
   output[outputIndex] = '\0';
 }
 
-void inline Growatt::metricsAddValue(const String& name, double value, uint16_t divisor,
+void inline Growatt::metricsAddValue(const String& name, const double& value, const float& resolution,
                               String& metrics, const String& labels) {
   char nameSnakeCase[name.length() + 10];
   camelCaseToSnakeCase(name, nameSnakeCase);
-    String svalue;
-    switch (divisor) {
-        case 1:
-            svalue = String((int32_t)value);
-            break;
-        case 10:
-            svalue = String(value, 1);
-            break;
-        default:
-            svalue = String(value, 2);
-    }
+    const String svalue = (resolution == 1) ? String((int32_t)value) : String(value);
     metrics += "growatt_" + String(nameSnakeCase) + "{" + labels + "} " + svalue + "\n";
    }
 
@@ -722,11 +713,11 @@ void Growatt::CreateMetrics(String& metrics, const String& MacAddress,
 #if SIMULATE_INVERTER != 1
     for (int i = 0; i < _Protocol.InputRegisterCount; i++)
         metricsAddValue(_Protocol.InputRegisters[i].name,
-                        getRegValue(&_Protocol.InputRegisters[i]), _Protocol.InputRegisters[i].divisor, metrics, labels);
+                        getRegValue(&_Protocol.InputRegisters[i]), _Protocol.InputRegisters[i].resolution, metrics, labels);
     
     for (int i = 0; i < _Protocol.HoldingRegisterCount; i++)
         metricsAddValue(_Protocol.HoldingRegisters[i].name,
-                        getRegValue(&_Protocol.HoldingRegisters[i]), _Protocol.HoldingRegisters[i].divisor, metrics,
+                        getRegValue(&_Protocol.HoldingRegisters[i]), _Protocol.HoldingRegisters[i].resolution, metrics,
                         labels);
     
 #else
