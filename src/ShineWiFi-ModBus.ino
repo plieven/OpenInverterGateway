@@ -605,7 +605,13 @@ void sendMetrics(void)
     //httpServer.setContentLength(metrics.available());
     Log.print(millis() - now);
     Log.println(" ms took metrics.available()");
-    httpServer.send(200, "text/plain", metrics);
+    httpServer.setContentLength(metrics.length());
+    httpServer.send(200, "text/plain", "");
+    WiFiClient client = httpServer.client();
+    for (int i = 0; i < metrics.length(); i += TCP_MSS) {
+        unsigned len = min(TCP_MSS, (int)metrics.length() - i);
+        client.write(metrics.c_str() + i, len);
+    }
    
         //bufferedWifiClient.write(metrics.read());
                     Log.print("Free Heap: ");
