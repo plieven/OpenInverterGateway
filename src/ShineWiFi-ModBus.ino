@@ -553,13 +553,10 @@ bool sendSingleJsonValue(void)
     Log.println(ESP.getFreeHeap());
     Log.print("Max Heap: ");
     Log.println(ESP.getMaxFreeBlockSize());
-            ShineJsonDocument(doc);
-
-    Inverter.CreateJson(doc, WiFi.macAddress(), Config.hostname);
-        Log.print(millis() - now);
-    Log.println(" ms took Inverter.CreateJson");
-    if (doc.containsKey(key)) {
-        httpServer.send(200, "text/plain", doc[key].as<String>());
+    double value;
+    Log.println(" ms took Inverter.getSingleValue");
+    if (Inverter.GetSingleValueByName(key, value)) {
+        httpServer.send(200, "text/plain", String(value));
         Log.print(millis() - now);
         Log.println(" ms took sendSingleJsonValue");
         return true;
