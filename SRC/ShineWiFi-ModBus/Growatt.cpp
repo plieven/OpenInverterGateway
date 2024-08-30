@@ -256,7 +256,7 @@ bool Growatt::ReadData(uint8_t maxRetries) {
   Log.print(retryCnt);
   Log.print(F(" retries in "));
   Log.print(millis() - readStart);
-  Log.print(F("ms"));
+  Log.println(F("ms"));
   return _GotData;
 }
 
