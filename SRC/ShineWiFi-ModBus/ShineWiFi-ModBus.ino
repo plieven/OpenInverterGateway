@@ -86,6 +86,7 @@ struct {
     WiFiManagerParameter* mqtt_user = NULL;
     WiFiManagerParameter* mqtt_pwd = NULL;
 #endif
+    WiFiManagerParameter* syslog_ip = NULL;
 } customWMParams;
 
 static const struct {
@@ -101,6 +102,7 @@ static const struct {
     const char* mqtt_user = "/mqttu";
     const char* mqtt_pwd = "/mqttw";
 #endif
+    const char* syslog_ip = "/syslogip";
     const char* force_ap = "/forceap";
 } ConfigFiles;
 
@@ -113,6 +115,7 @@ struct {
 #if MQTT_SUPPORTED == 1
   MqttConfig mqtt;
 #endif
+  String syslog_ip;
   bool force_ap;
 } Config;
 
@@ -203,6 +206,7 @@ void loadConfig()
     Config.mqtt.user = prefs.getString(ConfigFiles.mqtt_user, "");
     Config.mqtt.pwd = prefs.getString(ConfigFiles.mqtt_pwd, "");
 #endif
+    Config.syslog_ip = prefs.getString(ConfigFiles.syslog_ip, "");
 }
 
 void saveConfig()
@@ -219,6 +223,7 @@ void saveConfig()
     prefs.putString(ConfigFiles.mqtt_user, Config.mqtt.user);
     prefs.putString(ConfigFiles.mqtt_pwd, Config.mqtt.pwd);
 #endif
+    prefs.putString(ConfigFiles.syslog_ip, Config.syslog_ip);
 }
 
 void saveParamCallback()
@@ -240,6 +245,7 @@ void saveParamCallback()
     Config.mqtt.user = customWMParams.mqtt_user->getValue();
     Config.mqtt.pwd = customWMParams.mqtt_pwd->getValue();
 #endif
+    Config.syslog_ip = customWMParams.syslog_ip->getValue();
 
     saveConfig();
 
@@ -256,6 +262,9 @@ TelnetSerialStream telnetSerialStream = TelnetSerialStream();
 WebSerialStream webSerialStream = WebSerialStream(8080);
 #endif
 
+#include <SyslogStream.h>
+SyslogStream syslogStream = SyslogStream();
+
 void configureLogging() {
     #ifdef ENABLE_SERIAL_DEBUG
         Serial.begin(115200);
@@ -269,6 +278,14 @@ void configureLogging() {
     #ifdef ENABLE_WEB_DEBUG
         Log.addPrintStream(std::make_shared<WebSerialStream>(webSerialStream));
     #endif
+    if (!Config.syslog_ip.isEmpty()) {
+        syslogStream.setDestination(Config.syslog_ip.c_str());
+        //syslogStream.setRaw(true);
+        const std::shared_ptr<LOGBase> syslogStreamPtr = std::make_shared<SyslogStream>(syslogStream);
+        Log.addPrintStream(syslogStreamPtr);
+        Log.print(F("syslog server ip: "));
+        Log.println(Config.syslog_ip);
+    }
 }
 
 void setupGPIO() 
@@ -327,7 +344,6 @@ void setup()
 
     Log.println("Setup()");
 
-    configureLogging();
     setupGPIO();
 
     #if ENABLE_DOUBLE_RESET == 1
@@ -337,6 +353,7 @@ void setup()
     prefs.begin("ShineWifi");
 
     loadConfig();
+    configureLogging();
     setupWifiHost();
 
     #if OTA_SUPPORTED == 1
@@ -481,6 +498,7 @@ void setupWifiManagerConfigMenu(WiFiManager& wm) {
     customWMParams.mqtt_user = new WiFiManagerParameter("mqttusername", "username", Config.mqtt.user.c_str(), 40);
     customWMParams.mqtt_pwd = new WiFiManagerParameter("mqttpassword", "password", Config.mqtt.pwd.c_str(), 64);
 #endif
+    customWMParams.syslog_ip = new WiFiManagerParameter("syslogip", "syslog server IP (leave blank for none)", Config.syslog_ip.c_str(), 15);
     wm.addParameter(customWMParams.hostname);
 #if MQTT_SUPPORTED == 1
     wm.addParameter(new WiFiManagerParameter("<p><b>MQTT Settings</b> (leave server blank to disable)</p>"));
@@ -495,6 +513,8 @@ void setupWifiManagerConfigMenu(WiFiManager& wm) {
     wm.addParameter(customWMParams.static_netmask);
     wm.addParameter(customWMParams.static_gateway);
     wm.addParameter(customWMParams.static_dns);
+    wm.addParameter(new WiFiManagerParameter("<p><b>Advanced Settings</b></p>"));
+    wm.addParameter(customWMParams.syslog_ip);
 
     wm.setSaveParamsCallback(saveParamCallback);
 
